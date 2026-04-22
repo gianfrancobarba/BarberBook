@@ -1,0 +1,72 @@
+# =============================================
+# Documentazione di lavoro
+# =============================================
+docs/
+logo/
+# =============================================
+# Java / Maven
+# =============================================
+target/
+*.class
+*.jar
+!**/src/main/**/*.jar
+*.war
+*.ear
+*.log
+.mvn/timing.properties
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+HELP.md
+spring-shell.log
+
+# =============================================
+# Node / Frontend
+# =============================================
+node_modules/
+dist/
+.next/
+.nuxt/
+.output/
+
+# =============================================
+# Ambiente / Secret
+# =============================================
+.env
+.env.local
+.env.*.local
+.env.production
+docker-compose.override.yml
+
+# =============================================
+# Coverage e Report
+# =============================================
+*.exec
+jacoco.exec
+/coverage/
+htmlcov/
+
+# =============================================
+# SonarQube / SonarCloud
+# =============================================
+.sonar/
+.scannerwork/
+
+# =============================================
+# IDE
+# =============================================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+
+# =============================================
+# Sistema Operativo
+# =============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
