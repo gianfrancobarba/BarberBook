@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: barberbook
+
+  # Profilo attivo — override tramite variabile d'ambiente SPRING_PROFILES_ACTIVE
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # ── Datasource ──────────────────────────────────────────────────────────────
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # ── JPA / Hibernate ─────────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      # validate: Hibernate verifica lo schema — Flyway lo gestisce
+      # Mai usare create-drop in produzione
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false    # Disabilita OSIV — prevenzione lazy loading fuori transazione
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+
+  # ── Flyway ──────────────────────────────────────────────────────────────────
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false
+
+  # ── Jackson ─────────────────────────────────────────────────────────────────
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+
+# ── Actuator ──────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+# ── Info endpoint ──────────────────────────────────────────────────────────────
+info:
+  app:
+    name: BarberBook
+    description: Sistema gestionale prenotazioni barber shop
+    version: '@project.version@'
+
+# ── JWT ───────────────────────────────────────────────────────────────────────
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiry-ms: 900000       # 15 minuti
+  refresh-token-expiry-days: 7
+
+# ── Logging base ──────────────────────────────────────────────────────────────
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
