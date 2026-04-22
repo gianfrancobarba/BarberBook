@@ -1,0 +1,36 @@
+# ── Profilo SVILUPPO LOCALE ───────────────────────────────────────────────────
+# Caricato quando SPRING_PROFILES_ACTIVE=dev (default)
+# Sovrascrive solo i valori che differiscono da application.yml
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/barberbook
+    username: barberbook_user
+    password: barberbook_pass
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Dev: Flyway si connette al PostgreSQL locale (avviato con docker-compose)
+  flyway:
+    enabled: true
+
+# JWT: secret di sviluppo — NON usare in produzione
+jwt:
+  secret: dev_secret_key_minimum_32_chars_for_hmac_sha256_barberbook_dev
+
+# ── Logging in sviluppo: più verboso ─────────────────────────────────────────
+logging:
+  level:
+    com.barberbook: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# ── App URL per link email (dev) ──────────────────────────────────────────────
+app:
+  base-url: http://localhost:3000
