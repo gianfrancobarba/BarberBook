@@ -1,5 +1,7 @@
 # BarberBook 🪒
 
+[![CI Backend](https://github.com/gianfrancobarba/BarberBook/actions/workflows/ci-backend.yml/badge.svg)](https://github.com/gianfrancobarba/BarberBook/actions/workflows/ci-backend.yml)
+
 Sistema gestionale per prenotazioni barber shop — **Hair Man Tony**.
 
 BarberBook digitalizza l'agenda del salone eliminando la dipendenza da fogli Excel condivisi,
