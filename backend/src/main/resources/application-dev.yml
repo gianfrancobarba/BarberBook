@@ -31,6 +31,9 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-# ── App URL per link email (dev) ──────────────────────────────────────────────
 app:
   base-url: http://localhost:3000
+
+# ── Barber: dev password (admin1234) ──────────────────────────────────────────
+barber:
+  password-hash: $2a$12$0Nl.lR/wz6P0S/g6Gg/P7.1r58yI7g4yV0xS40mSg1/m.s23o20L6
