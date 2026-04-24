@@ -28,7 +28,7 @@ class JwtUtilTest {
         ClienteRegistrato user = new ClienteRegistrato();
         user.setId(1L);
         user.setEmail("test@example.com");
-        user.setRuolo(UserRole.CLIENT);
+
 
         String token = jwtUtil.generateAccessToken(user);
 
@@ -42,7 +42,7 @@ class JwtUtilTest {
         ClienteRegistrato user = new ClienteRegistrato();
         user.setId(123L);
         user.setEmail("test@example.com");
-        user.setRuolo(UserRole.CLIENT);
+
 
         String token = jwtUtil.generateAccessToken(user);
         Claims claims = jwtUtil.validateAndExtract(token);
@@ -57,7 +57,7 @@ class JwtUtilTest {
     void validateToken_tamperedJwt_throwsJwtException() {
         ClienteRegistrato user = new ClienteRegistrato();
         user.setId(1L);
-        user.setRuolo(UserRole.CLIENT);
+
 
         String token = jwtUtil.generateAccessToken(user);
         String tamperedToken = token + "modified";

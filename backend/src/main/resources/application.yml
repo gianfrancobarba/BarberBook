@@ -85,4 +85,4 @@ logging:
 
 # ── Barber ────────────────────────────────────────────────────────────────────
 barber:
-  password-hash: ${BARBER_PASSWORD_HASH}
+  password-hash: ${BARBER_PASSWORD_HASH:}

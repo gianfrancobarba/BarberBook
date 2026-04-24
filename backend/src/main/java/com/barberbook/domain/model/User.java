@@ -34,9 +34,17 @@ public abstract class User {
     @Column
     private String telefono;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, insertable = false, updatable = false)
-    private UserRole ruolo;
+    @Transient
+    public UserRole getRuolo() {
+        if (this instanceof Barbiere) return UserRole.BARBER;
+        if (this instanceof ClienteRegistrato) return UserRole.CLIENT;
+        return null;
+    }
+
+    @Transient
+    public String getPasswordHash() {
+        return null;
+    }
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

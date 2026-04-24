@@ -1,5 +1,6 @@
 package com.barberbook.domain.model;
 
+import com.barberbook.domain.enums.UserRole;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,5 +15,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Barbiere extends User {
-    // L'account è pre-configurato via migrazione Flyway
 }

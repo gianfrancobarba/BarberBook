@@ -57,7 +57,7 @@ class AuthServiceTest {
         ClienteRegistrato client = new ClienteRegistrato();
         client.setId(1L);
         client.setEmail("mario@example.com");
-        client.setRuolo(UserRole.CLIENT);
+
 
         when(userRepository.existsByEmail(dto.email())).thenReturn(false);
         when(userMapper.toEntity(dto)).thenReturn(client);
@@ -93,7 +93,7 @@ class AuthServiceTest {
         user.setId(1L);
         user.setEmail("mario@example.com");
         user.setPasswordHash("hashed_password");
-        user.setRuolo(UserRole.CLIENT);
+
 
         when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(dto.password(), "hashed_password")).thenReturn(true);
@@ -135,7 +135,7 @@ class AuthServiceTest {
         String rawToken = "raw_refresh_token";
         ClienteRegistrato user = new ClienteRegistrato();
         user.setId(1L);
-        user.setRuolo(UserRole.CLIENT);
+
         
         RefreshToken rt = new RefreshToken();
         rt.setUser(user);

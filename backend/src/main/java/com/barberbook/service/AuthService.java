@@ -1,5 +1,6 @@
 package com.barberbook.service;
 
+import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.Barbiere;
 import com.barberbook.domain.model.ClienteRegistrato;
 import com.barberbook.domain.model.RefreshToken;
@@ -127,10 +128,12 @@ public class AuthService {
     }
 
     private String extractPasswordHash(User user) {
-        if (user instanceof ClienteRegistrato client) return client.getPasswordHash();
-        if (user instanceof Barbiere) {
+        String dbHash = user.getPasswordHash();
+        if (dbHash != null) return dbHash;
+        
+        if (user.getRuolo() == UserRole.BARBER) {
             return barberPasswordHash;
         }
-        throw new IllegalStateException("Tipo utente sconosciuto");
+        return null;
     }
 }

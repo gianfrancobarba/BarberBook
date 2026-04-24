@@ -1,5 +1,6 @@
 package com.barberbook.domain.model;
 
+import com.barberbook.domain.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -23,4 +24,9 @@ public class ClienteRegistrato extends User {
 
     @Column
     private LocalDateTime emailVerifiedAt;
+
+    @Override
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 }
