@@ -1,6 +1,7 @@
 package com.barberbook.service;
 
 import com.barberbook.domain.enums.UserRole;
+import com.barberbook.domain.model.Barbiere;
 import com.barberbook.domain.model.ClienteRegistrato;
 import com.barberbook.domain.model.RefreshToken;
 import com.barberbook.domain.model.User;
@@ -190,5 +191,59 @@ class AuthServiceTest {
 
         assertTrue(rt.isRevoked());
         verify(refreshTokenRepository).save(rt);
+    }
+
+    @Test
+    @DisplayName("Logout con token inesistente -> non fa nulla")
+    void logout_unknownToken_doesNothing() {
+        when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.empty());
+        authService.logout("unknown_token");
+        verify(refreshTokenRepository, never()).save(any());
+    }
+
+    // --- Casi limite e rami non coperti ---
+    @Test
+    @DisplayName("Login Barbiere -> usa hash da configurazione")
+    void login_barberUser_usesConfiguredHash() {
+        LoginRequestDto dto = new LoginRequestDto("tony@barber.it", "password123");
+        Barbiere barber = new Barbiere();
+        barber.setId(2L);
+        barber.setEmail("tony@barber.it");
+
+        when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(barber));
+        when(passwordEncoder.matches(eq("password123"), anyString())).thenReturn(true);
+        when(jwtUtil.generateAccessToken(any())).thenReturn("token");
+        when(userMapper.toDto(any())).thenReturn(new UserResponseDto(2L, "Tony", "Barber", "tony@barber.it", null, UserRole.BARBER));
+
+        AuthResponseDto result = authService.login(dto);
+
+        assertNotNull(result);
+        verify(passwordEncoder).matches("password123", "$2a$12$hashedpassword");
+    }
+
+    @Test
+    @DisplayName("Login con utente senza hash password -> lancia IllegalStateException")
+    void login_userWithoutHash_throwsIllegalStateException() {
+        LoginRequestDto dto = new LoginRequestDto("no-hash@example.com", "pass");
+        ClienteRegistrato user = new ClienteRegistrato();
+        user.setPasswordHash(null);
+
+        when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalStateException.class, () -> authService.login(dto));
+    }
+
+    @Test
+    @DisplayName("Login con utente di tipo sconosciuto -> lancia IllegalStateException")
+    void login_unrecognizedUserRole_throwsIllegalStateException() {
+        LoginRequestDto dto = new LoginRequestDto("unknown-type@example.com", "pass");
+        User unknownUser = new User() {
+            @Override public Long getId() { return 99L; }
+            @Override public String getEmail() { return "unknown-type@example.com"; }
+        };
+
+        when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(unknownUser));
+
+        assertThrows(IllegalStateException.class, () -> authService.login(dto));
     }
 }
