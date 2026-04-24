@@ -229,6 +229,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <groups>integration</groups>
+                    <argLine>@{argLine}</argLine>
                     <includes>
                         <include>**/*Tests.java</include>
                         <include>**/*IT.java</include>
@@ -310,13 +311,13 @@
                     <!-- NOTA: la soglia (80%) è disabilitata in Sprint 0 perché
                          non esistono ancora classi di business da coprire.
                          Verrà abilitata a partire da Sprint 1. -->
-                    <!--
                     <execution>
                         <id>check</id>
                         <goals><goal>check</goal></goals>
                         <configuration>
                             <rules>
                                 <rule>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
@@ -333,7 +334,6 @@
                             </rules>
                         </configuration>
                     </execution>
-                    -->
                 </executions>
             </plugin>
 

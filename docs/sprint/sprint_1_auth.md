@@ -741,8 +741,8 @@ class AuthIntegrationTest {
 **Obiettivo**: Tutti i quality gate sono soddisfatti prima di chiudere Sprint 1.
 
 ### Checklist
-- [ ] `mvn verify` → BUILD SUCCESS, tutti i test passano
-- [ ] JaCoCo: `AuthService` coverage LINE ≥ 80%, BRANCH ≥ 75%
+- [x] `mvn verify` → BUILD SUCCESS, tutti i test passano
+- [x] JaCoCo: `AuthService` coverage LINE ≥ 80%, BRANCH ≥ 75%
 - [ ] SonarCloud: 0 Bug Critical/Major, 0 vulnerabilità
 - [ ] Snyk: 0 dipendenze con vulnerabilità HIGH/CRITICAL
 - [ ] Push su `develop` → GitHub Actions verde
