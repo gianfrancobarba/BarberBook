@@ -229,6 +229,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <groups>integration</groups>
+                    <argLine>@{argLine}</argLine>
                     <includes>
                         <include>**/*Tests.java</include>
                         <include>**/*IT.java</include>
