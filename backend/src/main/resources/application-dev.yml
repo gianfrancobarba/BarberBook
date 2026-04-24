@@ -4,9 +4,9 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/barberbook
-    username: barberbook_user
-    password: barberbook_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/barberbook}
+    username: ${DB_USER:barberbook_user}
+    password: ${DB_PASSWORD:barberbook_pass}
 
   jpa:
     show-sql: true
