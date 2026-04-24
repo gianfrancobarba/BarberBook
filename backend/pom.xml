@@ -156,6 +156,11 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -195,6 +200,44 @@
                 </configuration>
             </plugin>
 
+            <!-- ── Surefire: Unit Test (mvn test) ──────────────────────────
+                 Esegue solo test senza tag 'integration'.
+                 I test @Tag("integration") richiedono Docker — eseguiti
+                 solo in CI o manualmente con: mvn test -Dgroups=integration
+            ─────────────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>integration</excludedGroups>
+                    <argLine>@{argLine}</argLine>
+                </configuration>
+            </plugin>
+
+            <!-- ── Failsafe: Integration Test (mvn verify) ─────────────────
+                 Esegue solo test @Tag("integration").
+                 Richiede Docker in esecuzione per Testcontainers.
+            ─────────────────────────────────────────────────────────────── -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <groups>integration</groups>
+                    <includes>
+                        <include>**/*Tests.java</include>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- ── Compilatore: Lombok + MapStruct annotation processors ── -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -208,6 +251,11 @@
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
                         </path>
                         <path>
                             <groupId>org.mapstruct</groupId>

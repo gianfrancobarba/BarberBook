@@ -1,7 +1,9 @@
 # =============================================
-# Asset non versionati
+# Documentazione di lavoro (non versionata)
 # =============================================
+docs/
 logo/
+
 # =============================================
 # Java / Maven
 # =============================================
@@ -12,9 +14,8 @@ target/
 *.war
 *.ear
 *.log
-.mvn/timing.properties
-!.mvn/wrapper/maven-wrapper.jar
-!.mvn/wrapper/maven-wrapper.properties
+# Maven Wrapper — timing escluso, properties incluso
+**/mvn/timing.properties
 HELP.md
 spring-shell.log
 
