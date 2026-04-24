@@ -4,5 +4,6 @@ public record AuthResponseDto(
     String accessToken,
     String tokenType,
     long expiresIn,
-    String refreshTokenRaw
+    String refreshTokenRaw,
+    UserResponseDto user
 ) {}

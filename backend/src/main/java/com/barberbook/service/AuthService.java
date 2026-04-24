@@ -113,7 +113,7 @@ public class AuthService {
             .build();
         refreshTokenRepository.save(rt);
 
-        return new AuthResponseDto(accessToken, "Bearer", 900, refreshTokenRaw);
+        return new AuthResponseDto(accessToken, "Bearer", 900, refreshTokenRaw, userMapper.toDto(user));
     }
 
     private String generateSecureToken() {
