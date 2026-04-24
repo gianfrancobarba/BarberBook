@@ -22,8 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Sprint 0 — Integration Test.
  *
  * Verifica:
- *   1. Il contesto Spring si avvia senza errori (Flyway, JPA, Security)
- *   2. GET /api/health risponde 200 con { "status": "UP" }
+ * 1. Il contesto Spring si avvia senza errori (Flyway, JPA, Security)
+ * 2. GET /api/health risponde 200 con { "status": "UP" }
  *
  * Usa Testcontainers per un PostgreSQL reale in container Docker.
  * Nessun mock di database — validazione end-to-end dello stack.
@@ -37,6 +37,7 @@ class BarberBookApplicationTests {
 
     /** Container PostgreSQL condiviso per tutti i test di questa classe */
     @Container
+    @SuppressWarnings("resource")
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("barberbook_test")
             .withUsername("test")
@@ -68,7 +69,7 @@ class BarberBookApplicationTests {
     @DisplayName("GET /api/health → 200 OK con status UP")
     void healthEndpoint_returns200WithStatusUp() throws Exception {
         mockMvc.perform(get("/api/health")
-                        .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value("UP"))
