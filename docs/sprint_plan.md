@@ -36,7 +36,7 @@ Uno sprint è considerato **DONE** solo se:
 Sprint 0 — Infrastruttura
     └── Sprint 1 — Auth & Utenti
             └── Sprint 2 — Catalogo Servizi
-                    └── Sprint 3 — Gestione Poltrone
+                    └── Sprint 3 — Gestione Poltrone ✅
                             └── Sprint 4 — Orari & Disponibilità
                                     └── Sprint 5 — Prenotazioni (Core)
                                             ├── Sprint 6 — Notifiche
@@ -297,9 +297,11 @@ Poltrona
 - Poltrona soft-deleted non appare in lista pubblica
 
 ### Definition of Done Sprint 3
-- [ ] CRUD poltrone funzionante per BAR
-- [ ] Soft-delete implementato
-- [ ] Nome poltrona univoco garantito a livello DB (UNIQUE constraint)
+- [x] CRUD poltrone funzionante per BAR
+- [x] Unicità del nome garantita a livello DB e Service
+- [x] Soft-delete implementato e testato
+- [x] Vetrina pubblica poltrone funzionante
+- [x] Seed Flyway V7 applicato
 
 ---
 

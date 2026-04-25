@@ -1,5 +1,5 @@
 # Sprint 3 — Gestione Poltrone
-> **Stato**: ⬜ Non iniziato  
+> **Stato**: ✅ Completato  
 > **Dipende da**: Sprint 1 ✅  
 > **Obiettivo**: Il BAR gestisce le risorse fisiche del salone. Le poltrone sono l'unità base su cui si organizza tutta l'agenda — ogni prenotazione è associata a una poltrona specifica.
 
@@ -95,10 +95,10 @@ public interface PoltronaMapper {
 ```
 
 ### Attività
-- [ ] Creare `Poltrona.java` con unique constraint su `nome`
-- [ ] Creare `CreateChairRequestDto`, `UpdateChairRequestDto`, `ChairResponseDto`
-- [ ] Creare `PoltronaMapper` con MapStruct
-- [ ] Creare `PoltronaRepository extends JpaRepository<Poltrona, Long>`
+- [x] Creare `Poltrona.java` con unique constraint su `nome`
+- [x] Creare `CreateChairRequestDto`, `UpdateChairRequestDto`, `ChairResponseDto`
+- [x] Creare `PoltronaMapper` con MapStruct
+- [x] Creare `PoltronaRepository extends JpaRepository<Poltrona, Long>`
 
 ---
 
@@ -130,10 +130,10 @@ INSERT INTO chairs (nome) VALUES
 ```
 
 ### Attività
-- [ ] Creare `V6__chairs_schema.sql` con UNIQUE constraint su `nome`
-- [ ] Creare `V7__seed_chairs.sql` con le 2 poltrone iniziali
-- [ ] Verificare migrazioni applicate correttamente
-- [ ] Verificare che il UNIQUE constraint sia attivo: inserimento duplicato → errore DB
+- [x] Creare `V6__chairs_schema.sql` con UNIQUE constraint su `nome`
+- [x] Creare `V7__seed_chairs.sql` con le 2 poltrone iniziali
+- [x] Verificare migrazioni applicate correttamente
+- [x] Verificare che il UNIQUE constraint sia attivo: inserimento duplicato → errore DB
 
 ---
 
@@ -248,10 +248,10 @@ public ResponseEntity<ErrorResponseDto> handleChairConflict(ChairNameAlreadyExis
 ```
 
 ### Attività
-- [ ] Creare `PoltronaRepository` con query custom
-- [ ] Creare `ChairService` con tutti i metodi
-- [ ] Creare `ChairNameAlreadyExistsException` → `409 Conflict`
-- [ ] Aggiungere handler nel `GlobalExceptionHandler`
+- [x] Creare `PoltronaRepository` con query custom
+- [x] Creare `ChairService` con tutti i metodi
+- [x] Creare `ChairNameAlreadyExistsException` → `409 Conflict`
+- [x] Aggiungere handler nel `GlobalExceptionHandler`
 
 ---
 
@@ -325,10 +325,10 @@ public class ChairController {
 | DELETE | `/api/chairs/{id}` | BARBER | 204 / 403 / 404 | RF_BAR_4 |
 
 ### Attività
-- [ ] Creare `ChairController` con tutti gli endpoint
-- [ ] Aggiornare `SecurityConfig`: `GET /api/chairs` è pubblico
-- [ ] Verificare risposta `409` per nome duplicato
-- [ ] Verificare risposta `404` per poltrona non trovata
+- [x] Creare `ChairController` con tutti gli endpoint
+- [x] Aggiornare `SecurityConfig`: `GET /api/chairs` è pubblico
+- [x] Verificare risposta `409` per nome duplicato
+- [x] Verificare risposta `404` per poltrona non trovata
 
 ---
 
@@ -379,8 +379,8 @@ class ChairServiceTest {
 ```
 
 ### Attività
-- [ ] Implementare tutti i test `ChairServiceTest`
-- [ ] Verificare coverage `ChairService` ≥ 80%
+- [x] Implementare tutti i test `ChairServiceTest`
+- [x] Verificare coverage `ChairService` ≥ 80%
 
 ---
 
@@ -429,8 +429,8 @@ class ChairIntegrationTest {
 ```
 
 ### Attività
-- [ ] Implementare `ChairIntegrationTest` con Testcontainers
-- [ ] Verificare che il UNIQUE constraint a livello DB sia gestito senza stacktrace raw (GlobalExceptionHandler)
+- [x] Implementare `ChairIntegrationTest` con Testcontainers
+- [x] Verificare che il UNIQUE constraint a livello DB sia gestito senza stacktrace raw (GlobalExceptionHandler)
 
 ---
 
