@@ -1,6 +1,5 @@
 package com.barberbook.security;
 
-import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.Barbiere;
 import com.barberbook.domain.model.ClienteRegistrato;
 import org.junit.jupiter.api.DisplayName;

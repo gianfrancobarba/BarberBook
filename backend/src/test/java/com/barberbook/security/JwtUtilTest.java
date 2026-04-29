@@ -1,6 +1,5 @@
 package com.barberbook.security;
 
-import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.ClienteRegistrato;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
