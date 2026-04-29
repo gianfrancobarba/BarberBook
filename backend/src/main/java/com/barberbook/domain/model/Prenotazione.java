@@ -102,6 +102,7 @@ public class Prenotazione {
     }
 
     public static class PrenotazioneBuilder {
+        private Long id;
         private Poltrona poltrona;
         private Servizio servizio;
         private User client;
@@ -111,6 +112,7 @@ public class Prenotazione {
         private BookingStatus status = BookingStatus.IN_ATTESA;
         private LocalDateTime createdAt;
 
+        public PrenotazioneBuilder id(Long id) { this.id = id; return this; }
         public PrenotazioneBuilder poltrona(Poltrona poltrona) { this.poltrona = poltrona; return this; }
         public PrenotazioneBuilder servizio(Servizio servizio) { this.servizio = servizio; return this; }
         public PrenotazioneBuilder client(User client) { this.client = client; return this; }
@@ -122,6 +124,7 @@ public class Prenotazione {
 
         public Prenotazione build() {
             Prenotazione p = new Prenotazione();
+            p.id = this.id;
             p.poltrona = this.poltrona;
             p.servizio = this.servizio;
             p.client = this.client;
