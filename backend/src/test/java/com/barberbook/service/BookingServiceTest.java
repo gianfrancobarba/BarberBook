@@ -131,6 +131,120 @@ class BookingServiceTest {
         bookingService.createDirect(dto);
 
         verify(prenotazioneRepository).save(argThat(p -> p.getStatus() == BookingStatus.ACCETTATA));
-        verifyNoInteractions(eventPublisher); // BAR non notifica sé stesso
+        verifyNoInteractions(eventPublisher);
+    }
+
+    @Test
+    @DisplayName("createRequest - ritorna DTO non null")
+    void createRequestReturnsDto() {
+        BookingRequestDto dto = new BookingRequestDto(1L, 1L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+        BookingResponseDto expected = mock(BookingResponseDto.class);
+
+        when(poltronaRepository.findByIdAndAttivaTrue(1L)).thenReturn(Optional.of(chair));
+        when(servizioRepository.findByIdAndAttivoTrue(1L)).thenReturn(Optional.of(service));
+        when(prenotazioneRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        when(bookingMapper.toDto(any())).thenReturn(expected);
+
+        BookingResponseDto result = bookingService.createRequest(dto, client);
+
+        assertNotNull(result);
+        assertSame(expected, result);
+    }
+
+    @Test
+    @DisplayName("createGuestRequest - salva prenotazione senza client e pubblica evento")
+    void createGuestRequestSuccess() {
+        GuestBookingRequestDto dto = new GuestBookingRequestDto(
+            1L, 1L, LocalDate.now().plusDays(1), LocalTime.of(11, 0),
+            "Mario", "Rossi", "3331234567"
+        );
+
+        when(poltronaRepository.findByIdAndAttivaTrue(1L)).thenReturn(Optional.of(chair));
+        when(servizioRepository.findByIdAndAttivoTrue(1L)).thenReturn(Optional.of(service));
+        when(prenotazioneRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        when(bookingMapper.toDto(any())).thenReturn(mock(BookingResponseDto.class));
+
+        BookingResponseDto result = bookingService.createGuestRequest(dto);
+
+        assertNotNull(result);
+        verify(prenotazioneRepository).save(argThat(p ->
+            p.getClient() == null &&
+            p.getGuestData() != null &&
+            p.getStatus() == BookingStatus.IN_ATTESA
+        ));
+        verify(eventPublisher).publishEvent(any(BookingRequestCreatedEvent.class));
+    }
+
+    @Test
+    @DisplayName("rejectRequest - cambia stato a RIFIUTATA e pubblica evento")
+    void rejectRequestSuccess() {
+        Prenotazione booking = Prenotazione.builder().status(BookingStatus.IN_ATTESA).build();
+        when(prenotazioneRepository.findById(2L)).thenReturn(Optional.of(booking));
+
+        bookingService.rejectRequest(2L);
+
+        assertEquals(BookingStatus.RIFIUTATA, booking.getStatus());
+        assertNotNull(booking.getUpdatedAt());
+        verify(prenotazioneRepository).save(booking);
+        verify(eventPublisher).publishEvent(any(BookingRejectedEvent.class));
+    }
+
+    @Test
+    @DisplayName("cancelByBarber - cambia stato a ANNULLATA e pubblica evento")
+    void cancelByBarberSuccess() {
+        Prenotazione booking = Prenotazione.builder().status(BookingStatus.ACCETTATA).build();
+        when(prenotazioneRepository.findById(3L)).thenReturn(Optional.of(booking));
+
+        bookingService.cancelByBarber(3L);
+
+        assertEquals(BookingStatus.ANNULLATA, booking.getStatus());
+        assertNotNull(booking.getUpdatedAt());
+        verify(prenotazioneRepository).save(booking);
+        verify(eventPublisher).publishEvent(any(BookingCancelledByBarberEvent.class));
+    }
+
+    @Test
+    @DisplayName("acceptRequest - imposta updatedAt")
+    void acceptRequestSetsUpdatedAt() {
+        Prenotazione booking = Prenotazione.builder().status(BookingStatus.IN_ATTESA).build();
+        when(prenotazioneRepository.findById(4L)).thenReturn(Optional.of(booking));
+
+        bookingService.acceptRequest(4L);
+
+        assertNotNull(booking.getUpdatedAt());
+    }
+
+    @Test
+    @DisplayName("getPendingRequests - delega a repository e mapper")
+    void getPendingRequestsDelegatesToRepository() {
+        Prenotazione p = Prenotazione.builder().status(BookingStatus.IN_ATTESA).build();
+        when(prenotazioneRepository.findByStatusOrderByCreatedAtAsc(BookingStatus.IN_ATTESA))
+            .thenReturn(List.of(p));
+        when(bookingMapper.toDtoList(any())).thenReturn(List.of(mock(BookingResponseDto.class)));
+
+        List<BookingResponseDto> result = bookingService.getPendingRequests();
+
+        assertEquals(1, result.size());
+        verify(prenotazioneRepository).findByStatusOrderByCreatedAtAsc(BookingStatus.IN_ATTESA);
+    }
+
+    @Test
+    @DisplayName("getClientBookings - ritorna prenotazioni del cliente")
+    void getClientBookingsDelegatesToRepository() {
+        when(prenotazioneRepository.findByClientOrderByStartTimeDesc(client)).thenReturn(List.of());
+        when(bookingMapper.toDtoList(any())).thenReturn(List.of());
+
+        List<BookingResponseDto> result = bookingService.getClientBookings(client);
+
+        assertNotNull(result);
+        verify(prenotazioneRepository).findByClientOrderByStartTimeDesc(client);
+    }
+
+    @Test
+    @DisplayName("findOrThrow - lancia eccezione se prenotazione non trovata")
+    void findOrThrowNotFound() {
+        when(prenotazioneRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> bookingService.acceptRequest(99L));
     }
 }
