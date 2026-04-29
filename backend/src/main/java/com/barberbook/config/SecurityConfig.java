@@ -32,7 +32,7 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/services/**", "/api/chairs/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/services/**", "/api/chairs/**", "/api/availability/**").permitAll()
                 .requestMatchers("/api/health", "/actuator/**").permitAll()
                 .anyRequest().authenticated()
             )
