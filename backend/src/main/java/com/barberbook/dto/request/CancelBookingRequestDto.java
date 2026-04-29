@@ -1,0 +1,8 @@
+package com.barberbook.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record CancelBookingRequestDto(
+    @NotBlank @Size(min = 5, max = 1000) String reason
+) {}
