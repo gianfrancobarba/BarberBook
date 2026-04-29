@@ -11,15 +11,7 @@ import java.util.Optional;
 
 public interface FasciaOrariaRepository extends JpaRepository<FasciaOraria, Long> {
 
-    // Fascia di APERTURA per poltrona+giorno (al massimo 1)
-    Optional<FasciaOraria> findByPoltronaAndGiornoSettimanaAndTipo(
-        Poltrona poltrona, DayOfWeek giorno, ScheduleType tipo);
-
-    // Tutte le fasce (APERTURA + PAUSA) di una poltrona in un giorno
-    List<FasciaOraria> findByPoltronaAndGiornoSettimana(
-        Poltrona poltrona, DayOfWeek giorno);
-
-    // Solo le PAUSE di una poltrona in un giorno
+    // Fasce (APERTURA o PAUSA) di una poltrona in un giorno
     List<FasciaOraria> findByPoltronaAndGiornoSettimanaAndTipo(
         Poltrona poltrona, DayOfWeek giorno, ScheduleType tipo);
 

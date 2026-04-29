@@ -53,7 +53,7 @@ class AvailabilityServiceTest {
         when(servizioRepository.findByIdAndAttivoTrue(serviceId)).thenReturn(Optional.of(servizio));
         when(poltronaRepository.findByAttivaTrue()).thenReturn(List.of(poltrona));
         when(fasciaOrariaRepository.findByPoltronaAndGiornoSettimanaAndTipo(any(), any(), eq(ScheduleType.APERTURA)))
-                .thenReturn(Optional.of(FasciaOraria.builder().build()));
+                .thenReturn(List.of(FasciaOraria.builder().build()));
         when(availabilityStrategy.calculateAvailableSlots(any(), any(), any())).thenReturn(Collections.emptyList());
 
         List<AvailabilityResponseDto> result = availabilityService.getAvailableSlots(date, serviceId);

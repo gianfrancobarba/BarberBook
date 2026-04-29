@@ -1,6 +1,5 @@
 package com.barberbook.domain.model;
 
-import com.barberbook.domain.enums.UserRole;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

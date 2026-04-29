@@ -51,7 +51,7 @@ public class AvailabilityService {
         return poltrone.stream().map(poltrona -> {
             FasciaOraria apertura = fasciaOrariaRepository
                 .findByPoltronaAndGiornoSettimanaAndTipo(poltrona, dayOfWeek, ScheduleType.APERTURA)
-                .orElse(null);
+                .stream().findFirst().orElse(null);
 
             List<FasciaOraria> pause = fasciaOrariaRepository
                 .findByPoltronaAndGiornoSettimanaAndTipo(poltrona, dayOfWeek, ScheduleType.PAUSA);
