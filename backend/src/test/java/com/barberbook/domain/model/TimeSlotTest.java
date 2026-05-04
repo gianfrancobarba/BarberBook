@@ -56,6 +56,9 @@ class TimeSlotTest {
         
         // Adiacente (inizio = fine) -> No sovrapposizione
         assertThat(base.overlapsWith(LocalTime.of(9, 0), LocalTime.of(10, 0))).isFalse();
+        
+        // Testa anche overlapsWith(TimeSlot other)
+        assertThat(base.overlapsWith(new TimeSlot(LocalTime.of(10, 30), LocalTime.of(11, 30)))).isTrue();
     }
 
     @Test

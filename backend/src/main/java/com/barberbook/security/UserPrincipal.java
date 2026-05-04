@@ -17,6 +17,10 @@ public class UserPrincipal implements UserDetails {
     @Getter
     private final User user;
 
+    public Long getId() {
+        return user.getId();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRuolo().name()));

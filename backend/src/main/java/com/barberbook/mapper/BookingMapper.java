@@ -4,7 +4,6 @@ import com.barberbook.domain.model.Prenotazione;
 import com.barberbook.dto.response.BookingResponseDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 import java.util.List;
 
