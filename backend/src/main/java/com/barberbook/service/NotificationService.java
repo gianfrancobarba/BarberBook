@@ -150,6 +150,11 @@ public class NotificationService {
         notificaRepository.markAllAsReadForUser(userId);
     }
 
+    @Transactional(readOnly = true)
+    public long countUnreadForUser(Long userId) {
+        return notificaRepository.countByDestinatarioIdAndLettaFalse(userId);
+    }
+
     private User getBarber() {
         return userRepository.findByRuolo(UserRole.BARBER)
             .stream().findFirst()
