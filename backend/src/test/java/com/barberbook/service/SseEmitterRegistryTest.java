@@ -1,13 +1,10 @@
 package com.barberbook.service;
 
 import com.barberbook.domain.enums.NotificationType;
-import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.Barbiere;
 import com.barberbook.domain.model.ClienteRegistrato;
-import com.barberbook.domain.model.User;
 import com.barberbook.dto.response.NotificationPushDto;
 import com.barberbook.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

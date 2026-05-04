@@ -1,7 +1,6 @@
 package com.barberbook.service;
 
 import com.barberbook.domain.enums.BookingStatus;
-import com.barberbook.domain.enums.ScheduleType;
 import com.barberbook.domain.event.*;
 import com.barberbook.domain.model.*;
 import com.barberbook.dto.request.*;
@@ -27,7 +26,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 

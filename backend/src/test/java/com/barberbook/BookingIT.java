@@ -1,7 +1,6 @@
 package com.barberbook;
 
 import com.barberbook.domain.enums.BookingStatus;
-import com.barberbook.dto.request.BookingRequestDto;
 import com.barberbook.dto.request.GuestBookingRequestDto;
 import com.barberbook.dto.request.DirectBookingRequestDto;
 import com.barberbook.repository.PrenotazioneRepository;

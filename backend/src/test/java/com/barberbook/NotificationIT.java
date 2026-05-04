@@ -4,8 +4,6 @@ import com.barberbook.domain.event.BookingAcceptedEvent;
 import com.barberbook.domain.model.*;
 import com.barberbook.repository.NotificaRepository;
 import com.barberbook.repository.UserRepository;
-import com.barberbook.repository.PrenotazioneRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -14,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -44,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class NotificationIT {
 
     @Container
+    @SuppressWarnings("resource")
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("barberbook_test")
             .withUsername("test")
@@ -60,18 +57,16 @@ class NotificationIT {
     @Autowired private MockMvc mockMvc;
     @Autowired private NotificaRepository notificaRepository;
     @Autowired private UserRepository userRepository;
-    @Autowired private PrenotazioneRepository bookingRepository;
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     private User client;
-    private User barber;
 
     @BeforeEach
     void setUp() {
         notificaRepository.deleteAll();
         
-        // Recupera Tony dal seed o crealo se non presente
-        barber = userRepository.findByEmail("tony@hairmanbarber.it").orElseGet(() -> {
+        // Assicuriamoci che Tony esista
+        userRepository.findByEmail("tony@hairmanbarber.it").orElseGet(() -> {
             Barbiere b = new Barbiere();
             b.setNome("Tony");
             b.setCognome("Barber");
@@ -94,13 +89,9 @@ class NotificationIT {
     @Test
     @DisplayName("Evento BookingAccepted -> Notifica persistita su DB asincronamente")
     void bookingAccepted_persistsNotification() {
-        // Given
         Prenotazione booking = createMockBooking(client);
-        
-        // When: Pubblichiamo l'evento manualmente per testare l'Observer
         eventPublisher.publishEvent(new BookingAcceptedEvent(this, booking));
 
-        // Then: Verifichiamo con Awaitility (perché l'observer è @Async)
         await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
             long count = notificaRepository.countByDestinatarioIdAndLettaFalse(client.getId());
             assertEquals(1, count);
@@ -115,7 +106,6 @@ class NotificationIT {
 
         eventPublisher.publishEvent(new BookingAcceptedEvent(this, guestBooking));
 
-        // Verifichiamo che dopo 2 secondi non ci sia ancora nulla (caso negativo)
         try { Thread.sleep(2000); } catch (InterruptedException e) {}
         assertEquals(0, notificaRepository.count());
     }
@@ -124,7 +114,6 @@ class NotificationIT {
     @DisplayName("API: Recupero notifiche e segna come letta")
     @WithMockUser(username = "client@example.com")
     void api_manageNotifications() throws Exception {
-        // 1. Inseriamo una notifica manuale per il test API
         Notifica n = Notifica.builder()
                 .destinatario(client)
                 .tipo(com.barberbook.domain.enums.NotificationType.PRENOTAZIONE_ACCETTATA)
@@ -134,23 +123,18 @@ class NotificationIT {
                 .build();
         notificaRepository.save(n);
 
-        // 2. GET /api/notifications
         mockMvc.perform(get("/api/notifications"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].titolo").value("Test"));
 
-        // 3. PATCH /{id}/read
         mockMvc.perform(patch("/api/notifications/" + n.getId() + "/read"))
                 .andExpect(status().isOk());
 
-        // 4. Verifica stato su DB
         assertTrue(notificaRepository.findById(n.getId()).get().isLetta());
     }
 
     private Prenotazione createMockBooking(User client) {
-        // Per l'integrità del DB, dovremmo salvare anche servizio e poltrona, 
-        // ma per questo test specifico dell'observer ci basta l'oggetto transient se non accediamo al DB via JPA cascata
         return Prenotazione.builder()
                 .id(999L)
                 .client(client)

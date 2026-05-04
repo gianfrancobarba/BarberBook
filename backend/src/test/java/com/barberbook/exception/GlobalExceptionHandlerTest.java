@@ -78,6 +78,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Map<String, Object>> response = handler.handleValidationExceptions(ex);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        @SuppressWarnings("unchecked")
         Map<String, String> details = (Map<String, String>) response.getBody().get("details");
         assertNotNull(details);
         assertEquals("Email non valida", details.get("email"));
