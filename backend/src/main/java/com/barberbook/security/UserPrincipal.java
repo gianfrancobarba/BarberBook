@@ -1,6 +1,5 @@
 package com.barberbook.security;
 
-import com.barberbook.domain.model.ClienteRegistrato;
 import com.barberbook.domain.model.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
