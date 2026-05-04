@@ -247,4 +247,25 @@ class BookingServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> bookingService.acceptRequest(99L));
     }
+    @Test void updateSuccess() { 
+        UpdateBookingRequestDto dto = new UpdateBookingRequestDto(1L, 1L, LocalDate.now(), LocalTime.of(16,0)); 
+        Prenotazione booking = Prenotazione.builder().status(BookingStatus.IN_ATTESA).startTime(LocalDateTime.now()).poltrona(chair).servizio(service).build(); 
+        when(prenotazioneRepository.findById(1L)).thenReturn(Optional.of(booking)); 
+        when(poltronaRepository.findByIdAndAttivaTrue(1L)).thenReturn(Optional.of(chair)); 
+        when(servizioRepository.findByIdAndAttivoTrue(1L)).thenReturn(Optional.of(service)); 
+        when(prenotazioneRepository.save(any())).thenAnswer(i -> i.getArguments()[0]); 
+        when(bookingMapper.toDto(any())).thenReturn(mock(BookingResponseDto.class)); 
+        bookingService.update(1L, dto); 
+        verify(prenotazioneRepository).save(any()); 
+    }
+
+    @Test void updateWithNullValuesSuccess() {
+        UpdateBookingRequestDto dto = new UpdateBookingRequestDto(null, null, null, null); 
+        Prenotazione booking = Prenotazione.builder().status(BookingStatus.IN_ATTESA).startTime(LocalDateTime.now()).poltrona(chair).servizio(service).build(); 
+        when(prenotazioneRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(prenotazioneRepository.save(any())).thenAnswer(i -> i.getArguments()[0]); 
+        when(bookingMapper.toDto(any())).thenReturn(mock(BookingResponseDto.class)); 
+        bookingService.update(1L, dto); 
+        verify(prenotazioneRepository).save(any()); 
+    }
 }
