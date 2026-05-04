@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health", "/actuator/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(e -> e.authenticationEntryPoint(new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED)))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }

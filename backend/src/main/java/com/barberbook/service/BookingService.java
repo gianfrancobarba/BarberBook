@@ -205,6 +205,31 @@ public class BookingService {
         return bookingMapper.toDto(prenotazioneRepository.save(booking));
     }
 
+    /**
+     * RF_CLR_5 — Riprenotazione rapida.
+     * Preleva servizio e poltrona da una prenotazione passata
+     * e avvia una nuova richiesta per il nuovo slot.
+     */
+    public BookingResponseDto rebook(Long pastBookingId, LocalDate newDate,
+                                      LocalTime newStartTime, User client) {
+        Prenotazione past = findOrThrow(pastBookingId);
+
+        // Verifica ownership
+        if (past.getClient() == null || !past.getClient().getId().equals(client.getId())) {
+            throw new UnauthorizedOperationException("Non sei autorizzato a riprenotare basandoti su questa prenotazione");
+        }
+
+        // Crea nuova richiesta con stessa poltrona e servizio
+        BookingRequestDto dto = new BookingRequestDto(
+            past.getPoltrona().getId(),
+            past.getServizio().getId(),
+            newDate,
+            newStartTime
+        );
+
+        return createRequest(dto, client);  // riutilizza il flusso standard di creazione
+    }
+
     @Transactional(readOnly = true)
     public List<BookingResponseDto> getPendingRequests() {
         return bookingMapper.toDtoList(
