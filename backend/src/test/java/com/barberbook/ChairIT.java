@@ -13,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Tag("integration")
+@org.springframework.transaction.annotation.Transactional
 class ChairIT {
 
     @Container
@@ -51,18 +54,6 @@ class ChairIT {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Helper per ottenere il token del barbiere Tony (seed Flyway V3)
-    private String getBarberToken() throws Exception {
-        LoginRequestDto loginDto = new LoginRequestDto("tony@hairmanbarber.it", "admin1234");
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginDto)))
-                .andReturn();
-        String body = result.getResponse().getContentAsString();
-        AuthResponseDto auth = objectMapper.readValue(body, AuthResponseDto.class);
-        return auth.accessToken();
-    }
-
     @Test
     @DisplayName("GET /api/chairs -> ritorna le poltrone seedate (V7)")
     void getAll_public_returnsSeedChairs() throws Exception {
@@ -75,12 +66,11 @@ class ChairIT {
 
     @Test
     @DisplayName("POST /api/chairs -> BARBER può aggiungere una poltrona")
+    @WithUserDetails("tony@hairmanbarber.it")
     void create_asBarber_success() throws Exception {
-        String token = getBarberToken();
         CreateChairRequestDto dto = new CreateChairRequestDto("Poltrona VIP");
 
         mockMvc.perform(post("/api/chairs")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -93,12 +83,11 @@ class ChairIT {
 
     @Test
     @DisplayName("POST /api/chairs -> nome duplicato ritorna 409 Conflict")
+    @WithUserDetails("tony@hairmanbarber.it")
     void create_duplicateName_returns409() throws Exception {
-        String token = getBarberToken();
         CreateChairRequestDto dto = new CreateChairRequestDto("Poltrona 1");
 
         mockMvc.perform(post("/api/chairs")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict())
@@ -107,12 +96,11 @@ class ChairIT {
 
     @Test
     @DisplayName("PATCH /api/chairs/{id} -> BARBER può rinominare")
+    @WithUserDetails("tony@hairmanbarber.it")
     void rename_asBarber_success() throws Exception {
-        String token = getBarberToken();
         UpdateChairRequestDto dto = new UpdateChairRequestDto("Poltrona Master");
 
         mockMvc.perform(patch("/api/chairs/1")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -121,11 +109,9 @@ class ChairIT {
 
     @Test
     @DisplayName("DELETE /api/chairs/{id} -> soft delete nasconde la poltrona")
+    @WithUserDetails("tony@hairmanbarber.it")
     void delete_asBarber_softDeleteWorks() throws Exception {
-        String token = getBarberToken();
-
-        mockMvc.perform(delete("/api/chairs/2")
-                .header("Authorization", "Bearer " + token))
+        mockMvc.perform(delete("/api/chairs/2"))
                 .andExpect(status().isNoContent());
 
         // Verifichiamo che sparisca dalla lista pubblica
@@ -147,20 +133,9 @@ class ChairIT {
 
     @Test
     @DisplayName("POST /api/chairs -> CLIENT riceve 403 Forbidden")
+    @WithMockUser(roles = "CLIENT")
     void create_asClient_returns403() throws Exception {
-        // Registrazione e login client
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"nome\":\"C\",\"cognome\":\"L\",\"email\":\"cl@test.it\",\"password\":\"pass\",\"telefono\":\"1\"}"));
-        
-        String loginBody = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"cl@test.it\",\"password\":\"pass\"}"))
-                .andReturn().getResponse().getContentAsString();
-        String token = objectMapper.readValue(loginBody, AuthResponseDto.class).accessToken();
-
         mockMvc.perform(post("/api/chairs")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"nome\":\"Vietata\"}"))
                 .andExpect(status().isForbidden());

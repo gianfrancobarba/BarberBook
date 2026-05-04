@@ -34,6 +34,13 @@ public abstract class User {
     @Column
     private String telefono;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
+    @Column(name = "ruolo", insertable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole ruoloDiscriminator;
+
     @Transient
     public UserRole getRuolo() {
         if (this instanceof Barbiere) return UserRole.BARBER;
@@ -41,10 +48,6 @@ public abstract class User {
         return null;
     }
 
-    @Transient
-    public String getPasswordHash() {
-        return null;
-    }
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

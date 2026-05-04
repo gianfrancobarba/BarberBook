@@ -2,7 +2,10 @@ package com.barberbook;
 
 import com.barberbook.domain.enums.BookingStatus;
 import com.barberbook.domain.model.*;
-import com.barberbook.repository.*;
+import com.barberbook.repository.UserRepository;
+import com.barberbook.repository.PrenotazioneRepository;
+import com.barberbook.repository.PoltronaRepository;
+import com.barberbook.repository.ServizioRepository;
 import com.barberbook.dto.request.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +17,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -36,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Tag("integration")
+@Transactional
 class AdvancedFeaturesIT {
 
     @Container
@@ -74,16 +80,24 @@ class AdvancedFeaturesIT {
         testUser = userRepository.save(testUser);
 
         chair = new Poltrona(); chair.setNome("P1"); chair.setAttiva(true);
+        chair.setCreatedAt(LocalDateTime.now());
         chair = chairRepository.save(chair);
 
         service = new Servizio(); service.setNome("Taglio"); service.setDurataMinuti(30); service.setAttivo(true);
         service.setPrezzo(java.math.BigDecimal.valueOf(20));
+        service.setCreatedAt(LocalDateTime.now());
         service = serviceRepository.save(service);
+
+        Barbiere barber = new Barbiere();
+        barber.setNome("Tony"); barber.setCognome("Barber");
+        barber.setEmail("tony@barber.it");
+        barber.setCreatedAt(LocalDateTime.now());
+        userRepository.save(barber);
     }
 
     @Test
     @DisplayName("PATCH /api/users/me: Aggiorna correttamente il profilo")
-    @WithMockUser(username = "mario@example.com", roles = "CLIENT")
+    @WithUserDetails("mario@example.com")
     void updateProfile_success() throws Exception {
         UpdateProfileRequestDto dto = new UpdateProfileRequestDto("Luigi", "Verdi", null, "3339998888");
 
@@ -100,7 +114,7 @@ class AdvancedFeaturesIT {
 
     @Test
     @DisplayName("POST /api/bookings/{id}/rebook: Crea nuova prenotazione da una passata")
-    @WithMockUser(username = "mario@example.com", roles = "CLIENT")
+    @WithUserDetails("mario@example.com")
     void rebook_success() throws Exception {
         // Crea una prenotazione passata
         Prenotazione past = Prenotazione.builder()

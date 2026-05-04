@@ -2,7 +2,10 @@ package com.barberbook;
 
 import com.barberbook.domain.enums.BookingStatus;
 import com.barberbook.domain.model.*;
-import com.barberbook.repository.*;
+import com.barberbook.repository.UserRepository;
+import com.barberbook.repository.PrenotazioneRepository;
+import com.barberbook.repository.PoltronaRepository;
+import com.barberbook.repository.ServizioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -68,9 +72,11 @@ class DashboardIT {
         userRepository.deleteAll();
 
         chair = new Poltrona(); chair.setNome("Poltrona 1"); chair.setAttiva(true);
+        chair.setCreatedAt(LocalDateTime.now());
         chair = chairRepository.save(chair);
 
         service = new Servizio(); service.setNome("Taglio"); service.setPrezzo(java.math.BigDecimal.valueOf(20.0)); service.setDurataMinuti(30);
+        service.setCreatedAt(LocalDateTime.now());
         service = serviceRepository.save(service);
 
         client1 = new ClienteRegistrato();
@@ -82,11 +88,17 @@ class DashboardIT {
         client2.setNome("Luigi"); client2.setCognome("Verdi"); client2.setEmail("luigi@example.com");
         client2.setPasswordHash("hash"); client2.setCreatedAt(LocalDateTime.now());
         client2 = userRepository.save(client2);
+
+        Barbiere barber = new Barbiere();
+        barber.setNome("Tony"); barber.setCognome("Barber");
+        barber.setEmail("tony@barber.it");
+        barber.setCreatedAt(LocalDateTime.now());
+        userRepository.save(barber);
     }
 
     @Test
     @DisplayName("Dashboard BAR: Accessibile solo ai barbieri")
-    @WithMockUser(roles = "BARBER")
+    @WithUserDetails("tony@barber.it")
     void dailyDashboard_accessControl() throws Exception {
         mockMvc.perform(get("/api/dashboard/daily"))
                 .andExpect(status().isOk());
@@ -94,7 +106,7 @@ class DashboardIT {
 
     @Test
     @DisplayName("Dashboard BAR: Ritorna dati corretti per il giorno")
-    @WithMockUser(roles = "BARBER")
+    @WithUserDetails("tony@barber.it")
     void dailyDashboard_dataValidation() throws Exception {
         LocalDate today = LocalDate.now();
         createBooking(client1, today.atTime(10, 0), BookingStatus.ACCETTATA);
@@ -109,7 +121,7 @@ class DashboardIT {
 
     @Test
     @DisplayName("Dashboard BAR Settimanale: Ritorna sempre 7 giorni")
-    @WithMockUser(roles = "BARBER")
+    @WithUserDetails("tony@barber.it")
     void weeklyDashboard_always7Days() throws Exception {
         LocalDate monday = LocalDate.now().with(DayOfWeek.MONDAY);
         
@@ -121,7 +133,7 @@ class DashboardIT {
 
     @Test
     @DisplayName("Isolamento Dati: Client 1 non vede prenotazioni di Client 2")
-    @WithMockUser(username = "mario@example.com", roles = "CLIENT")
+    @WithUserDetails("mario@example.com")
     void clientDataIsolation() throws Exception {
         LocalDate today = LocalDate.now();
         createBooking(client1, today.atTime(10, 0), BookingStatus.ACCETTATA);
@@ -135,7 +147,7 @@ class DashboardIT {
 
     @Test
     @DisplayName("Homepage CLR: Mostra solo prossimi appuntamenti confermati")
-    @WithMockUser(username = "mario@example.com", roles = "CLIENT")
+    @WithUserDetails("mario@example.com")
     void clientHomepage_data() throws Exception {
         LocalDateTime future = LocalDateTime.now().plusDays(1);
         createBooking(client1, future, BookingStatus.ACCETTATA);

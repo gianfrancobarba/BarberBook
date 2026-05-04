@@ -28,11 +28,11 @@ class UserPrincipalTest {
     }
 
     @Test
-    @DisplayName("getPassword ritorna stringa vuota per barbiere")
-    void getPassword_barber_returnsEmpty() {
+    @DisplayName("getPassword ritorna null se non impostato (es. barbiere appena creato)")
+    void getPassword_barber_returnsNullIfUnset() {
         Barbiere barber = new Barbiere();
         UserPrincipal principal = new UserPrincipal(barber);
-        assertEquals("", principal.getPassword());
+        assertNull(principal.getPassword());
     }
 
     @Test

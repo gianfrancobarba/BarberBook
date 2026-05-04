@@ -13,6 +13,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Tag("integration")
+@org.springframework.transaction.annotation.Transactional
 class ServiceIntegrationTest {
 
     @Container
@@ -53,17 +56,6 @@ class ServiceIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Helper per ottenere il token del barbiere
-    private String getBarberToken() throws Exception {
-        LoginRequestDto loginDto = new LoginRequestDto("barber@barberbook.it", "admin1234");
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginDto)))
-                .andReturn();
-        String body = result.getResponse().getContentAsString();
-        AuthResponseDto auth = objectMapper.readValue(body, AuthResponseDto.class);
-        return auth.accessToken();
-    }
 
     @Test
     @DisplayName("GET /api/services -> ritorna i servizi seedati da Flyway")
@@ -76,16 +68,17 @@ class ServiceIntegrationTest {
 
     @Test
     @DisplayName("POST /api/services -> barbiere può creare un servizio")
+    @WithUserDetails("tony@hairmanbarber.it")
     void create_asBarber_success() throws Exception {
-        String token = getBarberToken();
-        CreateServiceRequestDto dto = new CreateServiceRequestDto("Colore", "Tinta capelli", 60, new BigDecimal("35.00"));
+        CreateServiceRequestDto dto = new CreateServiceRequestDto(
+            "Nuovo Taglio", "Taglio moderno", 45, new BigDecimal("25.00")
+        );
 
         mockMvc.perform(post("/api/services")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.nome").value("Colore"));
+                .andExpect(jsonPath("$.nome").value("Nuovo Taglio"));
         
         // Verifica che ora siano 6
         mockMvc.perform(get("/api/services"))
@@ -94,35 +87,25 @@ class ServiceIntegrationTest {
 
     @Test
     @DisplayName("POST /api/services -> invalid duration returns 400 Bad Request")
+    @WithUserDetails("tony@hairmanbarber.it")
     void create_asBarber_invalidDuration_returns400() throws Exception {
-        String token = getBarberToken();
         CreateServiceRequestDto dto = new CreateServiceRequestDto("Nome", "Desc", 0, new BigDecimal("10.00"));
 
         mockMvc.perform(post("/api/services")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("POST /api/services -> client riceve 403 Forbidden")
-    void create_asClient_forbidden() throws Exception {
-        // Registriamo un cliente per avere un token
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"nome\":\"Test\",\"cognome\":\"User\",\"email\":\"client@test.it\",\"password\":\"password\",\"telefono\":\"123\"}"));
-        
-        String loginBody = mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"client@test.it\",\"password\":\"password\"}"))
-                .andReturn().getResponse().getContentAsString();
-        String token = objectMapper.readValue(loginBody, AuthResponseDto.class).accessToken();
-
-        CreateServiceRequestDto dto = new CreateServiceRequestDto("Vietato", "...", 30, BigDecimal.TEN);
+    @DisplayName("POST /api/services -> cliente riceve 403 Forbidden")
+    @WithMockUser(roles = "CLIENT")
+    void create_asClient_returns403() throws Exception {
+        CreateServiceRequestDto dto = new CreateServiceRequestDto(
+            "Vietato", "", 10, new BigDecimal("10.00")
+        );
 
         mockMvc.perform(post("/api/services")
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isForbidden());
@@ -144,27 +127,28 @@ class ServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("PATCH /api/services/{id} -> barbiere può modificare un servizio")
+    @DisplayName("PATCH /api/services/{id} -> barbiere può aggiornare")
+    @WithUserDetails("tony@hairmanbarber.it")
     void update_asBarber_success() throws Exception {
-        String token = getBarberToken();
-        UpdateServiceRequestDto dto = new UpdateServiceRequestDto("Nuovo Nome", null, null, null);
+        UpdateServiceRequestDto dto = new UpdateServiceRequestDto(
+            "Capelli Premium", null, null, new BigDecimal("25.00")
+        );
 
-        mockMvc.perform(patch("/api/services/2")
-                .header("Authorization", "Bearer " + token)
+        mockMvc.perform(patch("/api/services/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("Nuovo Nome"));
+                .andExpect(jsonPath("$.nome").value("Capelli Premium"))
+                .andExpect(jsonPath("$.prezzo").value(25.00));
     }
 
     @Test
     @DisplayName("DELETE /api/services/{id} -> soft delete funziona")
+    @WithUserDetails("tony@hairmanbarber.it")
     void delete_asBarber_softDeleteWorks() throws Exception {
-        String token = getBarberToken();
         
         // Eliminiamo il servizio con ID 1 (Capelli)
-        mockMvc.perform(delete("/api/services/1")
-                .header("Authorization", "Bearer " + token))
+        mockMvc.perform(delete("/api/services/1"))
                 .andExpect(status().isNoContent());
 
         // Verifichiamo che non appaia più nella lista pubblica

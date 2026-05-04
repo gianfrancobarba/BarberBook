@@ -28,10 +28,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        if (user instanceof ClienteRegistrato client) {
-            return client.getPasswordHash();
-        }
-        return ""; // Il BAR ha la gestione password separata o nel config
+        return user.getPasswordHash();
     }
 
     @Override
