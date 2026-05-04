@@ -266,4 +266,38 @@ class BookingServiceTest {
         bookingService.update(1L, dto); 
         verify(prenotazioneRepository).save(any()); 
     }
+
+    @Test
+    @DisplayName("rebook: lancia eccezione se non proprietario")
+    void rebookUnauthorized() {
+        User hacker = new ClienteRegistrato(); hacker.setId(99L);
+        Prenotazione past = Prenotazione.builder().client(client).poltrona(chair).servizio(service).build();
+        
+        when(prenotazioneRepository.findById(1L)).thenReturn(Optional.of(past));
+
+        assertThrows(UnauthorizedOperationException.class, 
+            () -> bookingService.rebook(1L, LocalDate.now(), LocalTime.now(), hacker));
+    }
+
+    @Test
+    @DisplayName("rebook: crea nuova richiesta basata sulla precedente")
+    void rebookSuccess() {
+        Prenotazione past = Prenotazione.builder().client(client).poltrona(chair).servizio(service).build();
+        LocalDate nextWeek = LocalDate.now().plusWeeks(1);
+        LocalTime sameTime = LocalTime.of(10, 0);
+
+        when(prenotazioneRepository.findById(1L)).thenReturn(Optional.of(past));
+        when(poltronaRepository.findByIdAndAttivaTrue(1L)).thenReturn(Optional.of(chair));
+        when(servizioRepository.findByIdAndAttivoTrue(1L)).thenReturn(Optional.of(service));
+        when(prenotazioneRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
+        when(bookingMapper.toDto(any())).thenReturn(mock(BookingResponseDto.class));
+
+        bookingService.rebook(1L, nextWeek, sameTime, client);
+
+        verify(prenotazioneRepository, times(1)).save(argThat(p -> 
+            p.getPoltrona().equals(chair) && 
+            p.getServizio().equals(service) &&
+            p.getStartTime().toLocalDate().equals(nextWeek)
+        ));
+    }
 }
