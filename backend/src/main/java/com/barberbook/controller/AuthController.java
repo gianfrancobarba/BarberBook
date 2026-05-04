@@ -4,6 +4,7 @@ import com.barberbook.dto.request.LoginRequestDto;
 import com.barberbook.dto.request.RegisterRequestDto;
 import com.barberbook.dto.request.ForgotPasswordRequestDto;
 import com.barberbook.dto.request.ResetPasswordRequestDto;
+import com.barberbook.dto.request.GuestRegisterRequestDto;
 import com.barberbook.dto.response.AuthResponseDto;
 import com.barberbook.service.AuthService;
 import com.barberbook.service.PasswordResetService;
@@ -79,6 +80,16 @@ public class AuthController {
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto dto) {
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/guest-register")
+    public ResponseEntity<AuthResponseDto> guestRegister(
+            @Valid @RequestBody GuestRegisterRequestDto dto,
+            HttpServletResponse response) {
+        AuthResponseDto auth = authService.registerFromGuest(dto.bookingId(), dto.email(), dto.password());
+        addRefreshTokenCookie(response, auth.refreshTokenRaw());
+        return ResponseEntity.status(201).body(new AuthResponseDto(
+                auth.accessToken(), auth.tokenType(), auth.expiresIn(), null, auth.user()));
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String token) {
