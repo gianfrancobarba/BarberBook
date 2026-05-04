@@ -34,6 +34,7 @@ class DashboardServiceTest {
 
     @Test
     @DisplayName("getDailyDashboard: ritorna tutte le poltrone attive")
+    @SuppressWarnings("unchecked")
     void getDailyDashboard_returnsAllActiveChairs() {
         LocalDate date = LocalDate.now();
         Poltrona p1 = new Poltrona(); p1.setId(1L); p1.setNome("P1");
@@ -50,6 +51,7 @@ class DashboardServiceTest {
 
     @Test
     @DisplayName("getWeeklyDashboard: ritorna esattamente 7 giorni, anche se vuoti")
+    @SuppressWarnings("unchecked")
     void getWeeklyDashboard_returns7Days() {
         LocalDate start = LocalDate.now();
         when(poltronaRepository.findByAttivaTrue()).thenReturn(Collections.emptyList());

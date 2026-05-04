@@ -42,6 +42,7 @@ class ClientPortalServiceTest {
 
     @Test
     @DisplayName("getUpcomingBookings: ritorna lista dei prossimi appuntamenti")
+    @SuppressWarnings("unchecked")
     void getUpcomingBookings_success() {
         when(prenotazioneRepository.findAll(any(Specification.class), any(Sort.class)))
                 .thenReturn(List.of(new Prenotazione()));
@@ -56,6 +57,7 @@ class ClientPortalServiceTest {
 
     @Test
     @DisplayName("getBookingHistory: ritorna lo storico completo")
+    @SuppressWarnings("unchecked")
     void getBookingHistory_success() {
         when(prenotazioneRepository.findAll(any(Specification.class), any(Sort.class)))
                 .thenReturn(Collections.emptyList());
@@ -67,6 +69,7 @@ class ClientPortalServiceTest {
 
     @Test
     @DisplayName("getBookingsByStatus: filtra correttamente per lo stato fornito")
+    @SuppressWarnings("unchecked")
     void getBookingsByStatus_success() {
         when(prenotazioneRepository.findAll(any(Specification.class), any(Sort.class)))
                 .thenReturn(Collections.emptyList());

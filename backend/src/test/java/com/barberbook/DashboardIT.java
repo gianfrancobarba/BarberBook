@@ -70,7 +70,7 @@ class DashboardIT {
         chair = new Poltrona(); chair.setNome("Poltrona 1"); chair.setAttiva(true);
         chair = chairRepository.save(chair);
 
-        service = new Servizio(); service.setNome("Taglio"); service.setPrezzo(20.0); service.setDurataMinuti(30);
+        service = new Servizio(); service.setNome("Taglio"); service.setPrezzo(java.math.BigDecimal.valueOf(20.0)); service.setDurataMinuti(30);
         service = serviceRepository.save(service);
 
         client1 = new ClienteRegistrato();
