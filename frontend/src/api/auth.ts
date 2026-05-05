@@ -13,4 +13,10 @@ export const authApi = {
   
   me: () => 
     axiosInstance.get<UserResponseDto>('/users/me').then(res => res.data),
+
+  forgotPassword: (email: string) =>
+    axiosInstance.post('/auth/forgot-password', { email }),
+
+  resetPassword: (data: any) =>
+    axiosInstance.post('/auth/reset-password', data),
 };

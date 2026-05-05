@@ -45,3 +45,15 @@ export function useCurrentUser() {
     enabled: isAuthenticated(),
   });
 }
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: authApi.forgotPassword,
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: authApi.resetPassword,
+  });
+}
