@@ -64,8 +64,9 @@ export function BarberLayout() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 onClick={() => setIsSidebarOpen(false)}
+                aria-current={location.pathname === item.href ? "page" : undefined}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-4 w-4" aria-hidden="true" />
                 <span>{item.label}</span>
               </Link>
             ))}
@@ -76,8 +77,9 @@ export function BarberLayout() {
               variant="ghost" 
               className="w-full justify-start text-muted-foreground hover:text-destructive"
               onClick={() => logout()}
+              aria-label="Effettua il logout"
             >
-              <LogOut className="mr-3 h-4 w-4" />
+              <LogOut className="mr-3 h-4 w-4" aria-hidden="true" />
               Esci
             </Button>
           </div>
@@ -92,8 +94,9 @@ export function BarberLayout() {
             size="icon" 
             className="lg:hidden"
             onClick={() => setIsSidebarOpen(true)}
+            aria-label="Apri menu navigazione"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-6 w-6" aria-hidden="true" />
           </Button>
 
           <div className="ml-auto flex items-center space-x-4">

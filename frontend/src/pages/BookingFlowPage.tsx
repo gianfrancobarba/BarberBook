@@ -118,20 +118,20 @@ export default function BookingFlowPage() {
                            step === "SUCCESS" && idx === 2;
         
         return (
-          <div key={s.id} className="flex items-center">
+          <div key={s.id} className="flex items-center" aria-label={`Passaggio ${idx + 1}: ${s.id}${isActive ? ' (Corrente)' : isCompleted ? ' (Completato)' : ''}`}>
             <div className={cn(
               "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors",
               isActive ? "border-barber-500 bg-barber-50 text-barber-500 dark:bg-barber-950/30" : 
               isCompleted ? "border-green-500 bg-green-50 text-green-500 dark:bg-green-950/30" : 
               "border-muted text-muted-foreground"
             )}>
-              {isCompleted ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+              {isCompleted ? <CheckCircle2 className="h-5 w-5" aria-hidden="true" /> : <Icon className="h-5 w-5" aria-hidden="true" />}
             </div>
             {idx < 2 && (
               <div className={cn(
                 "h-0.5 w-10 mx-2",
                 isCompleted ? "bg-green-500" : "bg-muted"
-              )} />
+              )} aria-hidden="true" />
             )}
           </div>
         );

@@ -94,8 +94,9 @@ export function ClientLayout() {
             size="icon" 
             className="lg:hidden"
             onClick={() => setIsSidebarOpen(true)}
+            aria-label="Apri menu navigazione"
           >
-            <Menu className="h-6 w-6" />
+            <Menu className="h-6 w-6" aria-hidden="true" />
           </Button>
 
           <div className="ml-auto flex items-center space-x-4">
