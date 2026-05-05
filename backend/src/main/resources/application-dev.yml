@@ -33,6 +33,8 @@ logging:
 
 app:
   base-url: http://localhost:3000
+  cookie:
+    secure: false
 
 # ── Barber: dev password (admin1234) ──────────────────────────────────────────
 barber:

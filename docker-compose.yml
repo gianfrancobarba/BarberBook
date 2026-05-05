@@ -31,6 +31,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8080:8080"
+    restart: unless-stopped
 
   frontend:
     build:
@@ -42,7 +43,9 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8080
+      - VITE_API_URL=/api
+      - VITE_BACKEND_URL=http://backend:8080
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -52,6 +55,8 @@ services:
       - "80:80"
     depends_on:
       - backend
+      - frontend
+    restart: unless-stopped
 
 volumes:
   postgres_data:

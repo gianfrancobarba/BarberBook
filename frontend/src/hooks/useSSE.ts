@@ -4,8 +4,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { toast } from 'sonner';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
-
 export function useSSE() {
   const queryClient = useQueryClient();
   const { accessToken, isAuthenticated } = useAuthStore();
@@ -14,45 +12,51 @@ export function useSSE() {
   useEffect(() => {
     if (!isAuthenticated() || !accessToken) return;
 
-    // Connessione SSE con token in query param (gestito dal backend)
-    const eventSource = new EventSource(`${API_BASE_URL}/notifications/stream?token=${accessToken}`);
+    // EventSource non supporta header custom: il token viene passato come query param.
+    // Il backend (JwtAuthFilter) lo legge da ?token= per le connessioni SSE.
+    const eventSource = new EventSource(`/api/notifications/stream?token=${accessToken}`);
 
     eventSource.addEventListener('notification', (event) => {
       try {
         const data = JSON.parse(event.data);
-        
-        // 1. Aggiorna contatore notifiche
-        if (data.unreadCount !== undefined) {
-          setUnreadCount(data.unreadCount);
-        }
 
-        // 2. Notifica visiva (Toast)
-        if (data.message) {
-          toast(data.title || 'Nuova Notifica', {
-            description: data.message,
+        // I nomi dei campi corrispondono a NotificationPushDto del backend
+        if (data.messaggio) {
+          toast(data.titolo || 'Nuova Notifica', {
+            description: data.messaggio,
           });
         }
 
-        // 3. Invalida cache in base al tipo di evento
-        if (data.type === 'BOOKING_NEW' || data.type === 'BOOKING_STATUS_CHANGED') {
+        // Invalida cache in base al tipo di notifica (valori da NotificationType)
+        const bookingEventTypes = [
+          'NUOVA_RICHIESTA',
+          'PRENOTAZIONE_ACCETTATA',
+          'PRENOTAZIONE_RIFIUTATA',
+          'ANNULLAMENTO_DA_CLIENTE',
+          'ANNULLAMENTO_DA_BARBIERE',
+        ];
+        if (bookingEventTypes.includes(data.tipo)) {
           queryClient.invalidateQueries({ queryKey: ['dashboard'] });
           queryClient.invalidateQueries({ queryKey: ['bookings'] });
+          queryClient.invalidateQueries({ queryKey: ['pending-bookings'] });
         }
-        
-        // Invalida sempre l'elenco notifiche
+
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+        // Aggiorna il contatore non lette recuperandolo dal server
+        // (NotificationPushDto non include unreadCount — viene refreshato via query)
+        queryClient.invalidateQueries({ queryKey: ['notifications-unread'] });
 
       } catch (error) {
         console.error('Error parsing SSE notification:', error);
       }
     });
 
-    eventSource.addEventListener('ping', () => {
-      // Keep-alive gestito
+    eventSource.addEventListener('connected', () => {
+      // Heartbeat iniziale ricevuto — connessione SSE attiva
     });
 
-    eventSource.onerror = (error) => {
-      console.error('SSE Connection Error:', error);
+    eventSource.onerror = () => {
       eventSource.close();
     };
 

@@ -7,6 +7,7 @@ import com.barberbook.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ import java.time.Duration;
 public class AuthController {
 
     private final AuthService authService;
+
+    @Value("${app.cookie.secure:true}")
+    private boolean cookieSecure;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(
@@ -68,8 +72,8 @@ public class AuthController {
     private void addRefreshTokenCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
+                .secure(cookieSecure)
+                .sameSite(cookieSecure ? "Strict" : "Lax")
                 .maxAge(Duration.ofDays(7))
                 .path("/api/auth")
                 .build();
@@ -79,7 +83,7 @@ public class AuthController {
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .maxAge(0)
                 .path("/api/auth")
                 .build();

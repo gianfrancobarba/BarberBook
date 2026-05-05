@@ -15,9 +15,12 @@ export default defineConfig({
     },
   },
   server: {
+    host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        // In Docker il backend è raggiungibile tramite il service name.
+        // Fuori Docker (sviluppo locale) usa localhost:8080.
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:8080',
         changeOrigin: true,
       },
     },
