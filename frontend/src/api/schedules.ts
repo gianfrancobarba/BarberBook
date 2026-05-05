@@ -1,6 +1,9 @@
 import { axiosInstance } from './client';
 
 export const schedulesApi = {
+  getAllSchedules: () =>
+    axiosInstance.get('/schedules').then(res => res.data),
+
   getChairSchedules: (chairId: number) => 
     axiosInstance.get(`/schedules/chairs/${chairId}`).then(res => res.data),
   

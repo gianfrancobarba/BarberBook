@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { schedulesApi } from '@/api/schedules';
 
-export function useChairSchedule(chairId: number) {
+export function useSchedules(chairId?: number) {
   return useQuery({
     queryKey: ['schedules', chairId],
-    queryFn: () => schedulesApi.getChairSchedules(chairId),
-    enabled: !!chairId,
+    queryFn: () => chairId ? schedulesApi.getChairSchedules(chairId) : schedulesApi.getAllSchedules(),
   });
 }
 
