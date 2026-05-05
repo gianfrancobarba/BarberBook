@@ -34,11 +34,12 @@ public abstract class User {
     @Column
     private String telefono;
 
-    @Transient
+    @Column(name = "ruolo", insertable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole ruolo;
+
     public UserRole getRuolo() {
-        if (this instanceof Barbiere) return UserRole.BARBER;
-        if (this instanceof ClienteRegistrato) return UserRole.CLIENT;
-        return null;
+        return ruolo;
     }
 
     @Transient
