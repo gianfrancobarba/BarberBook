@@ -59,7 +59,7 @@ public class ServiceCatalogService {
 
         if (dto.nome() != null)          s.setNome(dto.nome());
         if (dto.descrizione() != null)   s.setDescrizione(dto.descrizione());
-        if (dto.durataMinuti() != null)  s.setDurataMinuti(dto.durataMinuti());
+        if (dto.durata() != null)        s.setDurataMinuti(dto.durata());
         if (dto.prezzo() != null)        s.setPrezzo(dto.prezzo());
         s.setUpdatedAt(LocalDateTime.now());
 

@@ -13,3 +13,10 @@ export interface AuthResponseDto {
   accessToken: string;
   user: UserResponseDto;
 }
+
+export interface UpdateUserRequestDto {
+  nome?: string;
+  cognome?: string;
+  email?: string;
+  telefono?: string;
+}

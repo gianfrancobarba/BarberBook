@@ -6,6 +6,7 @@ public record ServiceResponseDto(
     Long id,
     String nome,
     String descrizione,
-    Integer durataMinuti,
-    BigDecimal prezzo
+    Integer durata,
+    BigDecimal prezzo,
+    boolean attivo
 ) {}

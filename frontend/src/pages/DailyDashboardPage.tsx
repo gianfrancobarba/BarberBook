@@ -8,13 +8,13 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { 
-  Calendar as CalendarIcon, 
-  Clock, 
-  Users, 
-  TrendingUp, 
-  Check, 
-  X, 
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  Users,
+  TrendingUp,
+  Check,
+  X,
   Scissors,
   Armchair
 } from "lucide-react";
@@ -28,15 +28,23 @@ export default function DailyDashboardPage() {
 
   const { data: dashboard, isLoading: isLoadingDash } = useDailyDashboard(dateStr);
   const { data: pending, isLoading: isLoadingPending } = usePendingBookings();
-  
+
   const acceptMutation = useAcceptBooking();
   const rejectMutation = useRejectBooking();
+
+  const allBookings = dashboard?.chairs.flatMap(c => c.bookings) ?? [];
+  const totalBookings = allBookings.length;
+  const pendingCount = allBookings.filter(b => b.stato === "IN_ATTESA").length;
+  const confirmedCount = allBookings.filter(b => b.stato === "ACCETTATA").length;
+  const expectedRevenue = allBookings
+    .filter(b => b.stato === "ACCETTATA")
+    .reduce((sum, b) => sum + (b.servizio.prezzo ?? 0), 0);
 
   const handleAccept = async (id: number) => {
     try {
       await acceptMutation.mutateAsync(id);
       toast.success("Prenotazione accettata");
-    } catch (error) {
+    } catch {
       toast.error("Errore durante l'approvazione");
     }
   };
@@ -45,54 +53,31 @@ export default function DailyDashboardPage() {
     try {
       await rejectMutation.mutateAsync(id);
       toast.success("Prenotazione rifiutata");
-    } catch (error) {
+    } catch {
       toast.error("Errore durante il rifiuto");
     }
   };
 
   return (
     <div className="space-y-8">
-      {/* Header & Date Picker Placeholder */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold">Agenda Giornaliera</h1>
           <p className="text-muted-foreground">{format(selectedDate, "EEEE d MMMM yyyy", { locale: it })}</p>
         </div>
         <div className="flex items-center gap-2">
-           <Button variant="outline" onClick={() => setSelectedDate(new Date())}>Oggi</Button>
-           {/* Qui si potrebbe aggiungere un vero DatePicker */}
+          <Button variant="outline" onClick={() => setSelectedDate(new Date())}>Oggi</Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard 
-          title="Totale Prenotazioni" 
-          value={dashboard?.totalBookings || 0} 
-          icon={CalendarIcon} 
-          trend="+5% rispetto a ieri" 
-        />
-        <StatsCard 
-          title="In Attesa" 
-          value={dashboard?.pendingBookings || 0} 
-          icon={Clock} 
-          className="border-amber-500/50 bg-amber-500/5"
-        />
-        <StatsCard 
-          title="Confermate" 
-          value={dashboard?.confirmedBookings || 0} 
-          icon={Check} 
-          className="border-green-500/50 bg-green-500/5"
-        />
-        <StatsCard 
-          title="Incasso Previsto" 
-          value={`€${dashboard?.expectedRevenue || 0}`} 
-          icon={TrendingUp} 
-        />
+        <StatsCard title="Totale Prenotazioni" value={totalBookings} icon={CalendarIcon} />
+        <StatsCard title="In Attesa" value={pendingCount} icon={Clock} className="border-amber-500/50 bg-amber-500/5" />
+        <StatsCard title="Confermate" value={confirmedCount} icon={Check} className="border-green-500/50 bg-green-500/5" />
+        <StatsCard title="Incasso Previsto" value={`€${expectedRevenue}`} icon={TrendingUp} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Pending Requests Column */}
         <div className="lg:col-span-1 space-y-4">
           <h2 className="text-xl font-heading font-semibold flex items-center gap-2">
             <Users className="h-5 w-5 text-amber-500" />
@@ -118,17 +103,17 @@ export default function DailyDashboardPage() {
                         </span>
                       </div>
                       <div className="flex gap-2 pt-2">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           className="flex-1 bg-green-600 hover:bg-green-700 h-8"
                           onClick={() => handleAccept(p.id)}
                           disabled={acceptMutation.isPending}
                         >
                           <Check className="h-4 w-4 mr-1" /> Accetta
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
+                        <Button
+                          size="sm"
+                          variant="outline"
                           className="flex-1 h-8 text-destructive hover:bg-destructive/10 border-destructive/20"
                           onClick={() => handleReject(p.id)}
                           disabled={rejectMutation.isPending}
@@ -144,7 +129,6 @@ export default function DailyDashboardPage() {
           </ScrollArea>
         </div>
 
-        {/* Agenda Grid Column */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-heading font-semibold flex items-center gap-2">
             <Armchair className="h-5 w-5 text-barber-500" />
@@ -152,26 +136,31 @@ export default function DailyDashboardPage() {
           </h2>
           {isLoadingDash ? (
             <div className="flex justify-center py-12"><Spinner size={40} /></div>
-          ) : !dashboard || Object.keys(dashboard.bookingsByChair).length === 0 ? (
+          ) : !dashboard || dashboard.chairs.length === 0 ? (
             <EmptyState title="Nessuna poltrona configurata" description="Aggiungi delle poltrone nelle impostazioni." />
           ) : (
             <div className="grid gap-6">
-              {Object.entries(dashboard.bookingsByChair).map(([chairName, bookings]) => (
-                <Card key={chairName} className="overflow-hidden">
+              {dashboard.chairs.map((chair) => (
+                <Card key={chair.chairId} className="overflow-hidden">
                   <CardHeader className="bg-muted/30 py-3">
                     <CardTitle className="text-sm font-medium flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-barber-500" />
-                      {chairName}
+                      {chair.chairName}
+                      {chair.freeSlots.length > 0 && (
+                        <span className="ml-auto text-[10px] text-green-600 font-normal">
+                          {chair.freeSlots.length} slot liberi
+                        </span>
+                      )}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    {bookings.length === 0 ? (
+                    {chair.bookings.length === 0 ? (
                       <div className="p-8 text-center text-sm text-muted-foreground italic">
                         Nessun appuntamento programmato
                       </div>
                     ) : (
                       <div className="divide-y">
-                        {bookings.map((b) => (
+                        {chair.bookings.map((b) => (
                           <div key={b.id} className="flex items-center gap-4 p-4 hover:bg-muted/20 transition-colors">
                             <div className="w-16 text-center font-mono font-bold text-sm">
                               {format(new Date(b.startTime), "HH:mm")}
@@ -201,7 +190,7 @@ export default function DailyDashboardPage() {
   );
 }
 
-function StatsCard({ title, value, icon: Icon, trend, className }: any) {
+function StatsCard({ title, value, icon: Icon, className }: { title: string; value: string | number; icon: React.ElementType; className?: string }) {
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardContent className="p-6">
@@ -209,9 +198,8 @@ function StatsCard({ title, value, icon: Icon, trend, className }: any) {
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
-        <div className="mt-2 flex items-baseline gap-2">
+        <div className="mt-2">
           <h3 className="text-2xl font-bold">{value}</h3>
-          {trend && <span className="text-[10px] text-green-600 font-medium">{trend}</span>}
         </div>
       </CardContent>
     </Card>

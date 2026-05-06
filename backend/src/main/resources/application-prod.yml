@@ -31,6 +31,8 @@ logging:
 # ── App URL per link email (produzione) ───────────────────────────────────────
 app:
   base-url: ${APP_BASE_URL}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
 # ── Disabilita stack trace nelle response HTTP ────────────────────────────────
 server:

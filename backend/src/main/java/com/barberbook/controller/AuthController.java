@@ -1,7 +1,9 @@
 package com.barberbook.controller;
 
+import com.barberbook.dto.request.ForgotPasswordRequestDto;
 import com.barberbook.dto.request.LoginRequestDto;
 import com.barberbook.dto.request.RegisterRequestDto;
+import com.barberbook.dto.request.ResetPasswordRequestDto;
 import com.barberbook.dto.response.AuthResponseDto;
 import com.barberbook.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -66,6 +68,18 @@ public class AuthController {
             authService.logout(refreshToken);
         }
         clearRefreshTokenCookie(response);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto dto) {
+        authService.requestPasswordReset(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto dto) {
+        authService.resetPassword(dto);
         return ResponseEntity.ok().build();
     }
 

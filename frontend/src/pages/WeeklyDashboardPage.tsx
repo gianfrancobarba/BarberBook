@@ -3,11 +3,10 @@ import { useWeeklyDashboard } from "@/hooks/useDashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/common/Spinner";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  ChevronLeft,
+  ChevronRight,
   Calendar as CalendarIcon,
-  Users
 } from "lucide-react";
 import { format, startOfWeek, addDays, subWeeks, addWeeks } from "date-fns";
 import { it } from "date-fns/locale";
@@ -31,7 +30,7 @@ export default function WeeklyDashboardPage() {
         <div>
           <h1 className="text-3xl font-heading font-bold">Agenda Settimanale</h1>
           <p className="text-muted-foreground">
-            {format(currentWeekStart, "d MMMM", { locale: it })} - {format(addDays(currentWeekStart, 6), "d MMMM yyyy", { locale: it })}
+            {format(currentWeekStart, "d MMMM", { locale: it })} – {format(addDays(currentWeekStart, 6), "d MMMM yyyy", { locale: it })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -47,11 +46,13 @@ export default function WeeklyDashboardPage() {
         <div className="grid gap-4 lg:grid-cols-7">
           {dashboard?.days.map((day) => {
             const isToday = format(new Date(), "yyyy-MM-dd") === day.date;
-            const dateObj = new Date(day.date);
+            const dateObj = new Date(day.date + "T00:00:00");
+            const allBookings = day.chairs.flatMap(c => c.bookings);
+            const totalFreeSlots = day.chairs.reduce((sum, c) => sum + c.freeSlots.length, 0);
 
             return (
-              <Card 
-                key={day.date} 
+              <Card
+                key={day.date}
                 className={cn(
                   "flex flex-col h-full min-h-[400px] transition-all hover:ring-2 hover:ring-barber-500/50",
                   isToday && "ring-2 ring-barber-500 bg-barber-500/[0.02]"
@@ -61,24 +62,24 @@ export default function WeeklyDashboardPage() {
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                     {format(dateObj, "EEE", { locale: it })}
                   </p>
-                  <CardTitle className={cn(
-                    "text-xl font-heading",
-                    isToday && "text-barber-500"
-                  )}>
+                  <CardTitle className={cn("text-xl font-heading", isToday && "text-barber-500")}>
                     {format(dateObj, "d")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 flex-1 overflow-hidden">
                   <div className="mb-3 flex items-center justify-between text-[10px] text-muted-foreground font-bold">
-                    <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {day.totalBookings}</span>
+                    <span>{allBookings.length} prenotazioni</span>
+                    {totalFreeSlots > 0 && (
+                      <span className="text-green-600">{totalFreeSlots} slot liberi</span>
+                    )}
                   </div>
-                  
+
                   <div className="space-y-2">
-                    {day.bookings.slice(0, 5).map((b) => (
-                      <div 
-                        key={b.id} 
-                        className="text-[10px] p-2 rounded bg-muted/50 border-l-2 border-barber-500 group cursor-default"
-                        title={`${b.servizio.nome} - ${b.client?.nome || b.guestNome}`}
+                    {allBookings.slice(0, 5).map((b) => (
+                      <div
+                        key={b.id}
+                        className="text-[10px] p-2 rounded bg-muted/50 border-l-2 border-barber-500 cursor-default"
+                        title={`${b.servizio.nome} – ${b.client?.nome || b.guestNome}`}
                       >
                         <div className="font-bold flex justify-between">
                           <span>{format(new Date(b.startTime), "HH:mm")}</span>
@@ -87,12 +88,12 @@ export default function WeeklyDashboardPage() {
                         <div className="text-muted-foreground truncate">{b.servizio.nome}</div>
                       </div>
                     ))}
-                    {day.totalBookings > 5 && (
+                    {allBookings.length > 5 && (
                       <div className="text-[10px] text-center text-muted-foreground pt-1">
-                        + {day.totalBookings - 5} altre
+                        + {allBookings.length - 5} altre
                       </div>
                     )}
-                    {day.totalBookings === 0 && (
+                    {allBookings.length === 0 && (
                       <div className="h-full flex items-center justify-center pt-20">
                         <CalendarIcon className="h-8 w-8 text-muted/20" />
                       </div>
@@ -105,11 +106,14 @@ export default function WeeklyDashboardPage() {
         </div>
       )}
 
-      {/* Legend / Info Footer */}
       <footer className="flex items-center gap-6 text-sm text-muted-foreground bg-muted/30 p-4 rounded-xl">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full bg-barber-500" />
           <span>Prenotazioni Confermate</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-3 w-3 rounded-full bg-green-500" />
+          <span>Slot Liberi</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full border-2 border-barber-500 bg-barber-500/5" />

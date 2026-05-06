@@ -234,6 +234,19 @@ public class BookingService {
         validators.forEach(v -> v.validate(req));
     }
 
+    /**
+     * RF_CLR_5 — Riprenotazione rapida: ritorna i dati della prenotazione passata
+     * per pre-compilare il wizard di prenotazione nel frontend.
+     */
+    @Transactional(readOnly = true)
+    public BookingResponseDto getBookingForRebook(Long bookingId, User requester) {
+        Prenotazione booking = findOrThrow(bookingId);
+        if (booking.getClient() == null || !booking.getClient().getId().equals(requester.getId())) {
+            throw new UnauthorizedOperationException("Non sei autorizzato a visualizzare questa prenotazione");
+        }
+        return bookingMapper.toDto(booking);
+    }
+
     private Prenotazione findOrThrow(Long id) {
         return prenotazioneRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Prenotazione non trovata: " + id));

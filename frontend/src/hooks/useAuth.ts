@@ -57,3 +57,15 @@ export function useResetPassword() {
     mutationFn: authApi.resetPassword,
   });
 }
+
+export function useUpdateProfile() {
+  const { setUser } = useAuthStore();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: authApi.updateProfile,
+    onSuccess: (data) => {
+      setUser(data);
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+}

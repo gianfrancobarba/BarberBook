@@ -1,18 +1,21 @@
 import { axiosInstance } from './client';
-import { type AuthResponseDto, type UserResponseDto } from '@/types/auth';
+import { type AuthResponseDto, type UserResponseDto, type UpdateUserRequestDto } from '@/types/auth';
 
 export const authApi = {
-  login: (credentials: any) => 
+  login: (credentials: any) =>
     axiosInstance.post<AuthResponseDto>('/auth/login', credentials).then(res => res.data),
-  
-  register: (data: any) => 
+
+  register: (data: any) =>
     axiosInstance.post<AuthResponseDto>('/auth/register', data).then(res => res.data),
-  
-  logout: () => 
+
+  logout: () =>
     axiosInstance.post('/auth/logout'),
-  
-  me: () => 
+
+  me: () =>
     axiosInstance.get<UserResponseDto>('/users/me').then(res => res.data),
+
+  updateProfile: (data: UpdateUserRequestDto) =>
+    axiosInstance.patch<UserResponseDto>('/users/me', data).then(res => res.data),
 
   forgotPassword: (email: string) =>
     axiosInstance.post('/auth/forgot-password', { email }),

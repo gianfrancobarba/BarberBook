@@ -4,19 +4,27 @@ import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.ClienteRegistrato;
 import com.barberbook.domain.model.RefreshToken;
 import com.barberbook.domain.model.User;
+import com.barberbook.domain.model.PasswordResetToken;
+import com.barberbook.dto.request.ForgotPasswordRequestDto;
 import com.barberbook.dto.request.LoginRequestDto;
 import com.barberbook.dto.request.RegisterRequestDto;
+import com.barberbook.dto.request.ResetPasswordRequestDto;
+import com.barberbook.dto.request.UpdateUserRequestDto;
 import com.barberbook.dto.response.AuthResponseDto;
+import com.barberbook.dto.response.UserResponseDto;
 import com.barberbook.exception.EmailAlreadyExistsException;
 import com.barberbook.exception.InvalidCredentialsException;
 import com.barberbook.exception.InvalidTokenException;
+import com.barberbook.exception.ResourceNotFoundException;
 import com.barberbook.exception.TokenReuseDetectedException;
 import com.barberbook.mapper.UserMapper;
+import com.barberbook.repository.PasswordResetTokenRepository;
 import com.barberbook.repository.RefreshTokenRepository;
 import com.barberbook.repository.UserRepository;
 import com.barberbook.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +35,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -34,6 +43,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
@@ -41,7 +51,11 @@ public class AuthService {
     @Value("${barber.password-hash:}")
     private String barberPasswordHash;
 
+    @Value("${app.base-url:http://localhost:3000}")
+    private String appBaseUrl;
+
     private static final Duration REFRESH_TOKEN_EXPIRY = Duration.ofDays(7);
+    private static final Duration RESET_TOKEN_EXPIRY = Duration.ofHours(1);
 
     public AuthResponseDto register(RegisterRequestDto dto) {
         if (userRepository.existsByEmail(dto.email())) {
@@ -50,6 +64,7 @@ public class AuthService {
         ClienteRegistrato client = userMapper.toEntity(dto);
         client.setPasswordHash(passwordEncoder.encode(dto.password()));
         client.setCreatedAt(LocalDateTime.now());
+        client.setEmailVerifiedAt(LocalDateTime.now());
         ClienteRegistrato saved = userRepository.save(client);
         return generateTokenPair(saved);
     }
@@ -88,6 +103,66 @@ public class AuthService {
         rt.setRevoked(true);
         refreshTokenRepository.save(rt);
         return generateTokenPair(rt.getUser());
+    }
+
+    public UserResponseDto updateProfile(Long userId, UpdateUserRequestDto dto) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato"));
+
+        if (dto.email() != null && !dto.email().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(dto.email())) {
+                throw new EmailAlreadyExistsException("Email già in uso: " + dto.email());
+            }
+            user.setEmail(dto.email());
+        }
+        if (dto.nome() != null) user.setNome(dto.nome());
+        if (dto.cognome() != null) user.setCognome(dto.cognome());
+        if (dto.telefono() != null) user.setTelefono(dto.telefono());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return userMapper.toDto(userRepository.save(user));
+    }
+
+    public void requestPasswordReset(ForgotPasswordRequestDto dto) {
+        userRepository.findByEmail(dto.email()).ifPresent(user -> {
+            passwordResetTokenRepository.invalidateAllByUserId(user.getId());
+
+            String rawToken = generateSecureToken();
+            String tokenHash = hashToken(rawToken);
+
+            PasswordResetToken prt = PasswordResetToken.builder()
+                .tokenHash(tokenHash)
+                .user(user)
+                .expiresAt(LocalDateTime.now().plus(RESET_TOKEN_EXPIRY))
+                .used(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+            passwordResetTokenRepository.save(prt);
+
+            String resetLink = appBaseUrl + "/reset-password?token=" + rawToken;
+            log.info("Password reset link for {}: {}", dto.email(), resetLink);
+        });
+    }
+
+    public void resetPassword(ResetPasswordRequestDto dto) {
+        String tokenHash = hashToken(dto.token());
+        PasswordResetToken prt = passwordResetTokenRepository.findByTokenHashAndUsedFalse(tokenHash)
+            .orElseThrow(() -> new InvalidTokenException("Token non valido o già utilizzato"));
+
+        if (prt.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new InvalidTokenException("Token scaduto");
+        }
+
+        User user = prt.getUser();
+        if (user instanceof com.barberbook.domain.model.ClienteRegistrato client) {
+            client.setPasswordHash(passwordEncoder.encode(dto.newPassword()));
+            client.setUpdatedAt(LocalDateTime.now());
+            userRepository.save(client);
+        }
+
+        prt.setUsed(true);
+        passwordResetTokenRepository.save(prt);
+        refreshTokenRepository.revokeAllByUserId(user.getId());
     }
 
     public void logout(String refreshTokenRaw) {

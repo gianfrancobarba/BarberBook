@@ -10,5 +10,6 @@ public record ChairDayScheduleDto(
     Long chairId,
     String chairName,
     LocalDate date,
-    List<BookingResponseDto> bookings
+    List<BookingResponseDto> bookings,
+    List<TimeSlotDto> freeSlots
 ) {}

@@ -20,11 +20,12 @@ export const useAuthStore = create<AuthState>()(
       setAccessToken: (token) => set({ accessToken: token }),
       setUser: (user) => set({ user }),
       clearSession: () => set({ accessToken: null, user: null }),
-      isAuthenticated: () => !!get().accessToken,
+      isAuthenticated: () => !!get().user,
       isBarber: () => get().user?.ruolo === 'BARBER',
     }),
     {
       name: 'barber-auth-storage',
+      partialize: (state) => ({ user: state.user }),
     }
   )
 );
