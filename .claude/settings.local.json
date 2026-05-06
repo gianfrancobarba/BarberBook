@@ -15,7 +15,11 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(grep -v \"^\\\\s*$\")",
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(mvn -q exec:java -Dexec.mainClass=\"com.barberbook.util.HashGenerator\")",
+      "Bash(node -e \"const bcrypt = require\\('bcryptjs'\\); bcrypt.hash\\('admin1234', 12\\).then\\(h => console.log\\(h\\)\\);\")",
+      "Bash(mvn -q dependency:copy-dependencies -DoutputDirectory=target/deps -DincludeArtifactIds=spring-security-crypto,commons-logging)",
+      "Bash(java -cp \"target/deps/*\" org.springframework.security.crypto.bcrypt.BCrypt)"
     ]
   }
 }
