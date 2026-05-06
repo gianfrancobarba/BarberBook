@@ -26,14 +26,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
+        String token = extractToken(request);
+        if (token == null) {
             chain.doFilter(request, response);
             return;
         }
 
         try {
-            String token = header.substring(7);
             Claims claims = jwtUtil.validateAndExtract(token);
             Long userId = Long.parseLong(claims.getSubject());
 
@@ -47,5 +46,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    /**
+     * Estrae il token JWT dall'header Authorization oppure dal query param ?token=
+     * Il query param è necessario per EventSource (SSE) che non supporta header custom.
+     */
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        String queryToken = request.getParameter("token");
+        if (queryToken != null && !queryToken.isBlank()) {
+            return queryToken;
+        }
+        return null;
     }
 }

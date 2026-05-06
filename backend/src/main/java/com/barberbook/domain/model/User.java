@@ -34,18 +34,12 @@ public abstract class User {
     @Column
     private String telefono;
 
-    @Column(name = "password_hash")
-    private String passwordHash;
-
     @Column(name = "ruolo", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
-    private UserRole ruoloDiscriminator;
+    private UserRole ruolo;
 
-    @Transient
     public UserRole getRuolo() {
-        if (this instanceof Barbiere) return UserRole.BARBER;
-        if (this instanceof ClienteRegistrato) return UserRole.CLIENT;
-        return null;
+        return ruolo;
     }
 
 

@@ -1,21 +1,19 @@
 package com.barberbook.domain.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * Entità per la gestione dei token di recupero password.
- * I token sono monouso e hanno una scadenza temporale.
- */
 @Entity
 @Table(name = "password_reset_tokens")
-@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Builder
 public class PasswordResetToken {
 
     @Id
@@ -25,7 +23,7 @@ public class PasswordResetToken {
     @Column(nullable = false, unique = true)
     private String tokenHash;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -33,8 +31,7 @@ public class PasswordResetToken {
     private LocalDateTime expiresAt;
 
     @Column(nullable = false)
-    @Builder.Default
-    private boolean used = false;
+    private boolean used;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

@@ -106,14 +106,12 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getClientBookings(principal.getUser()));
     }
 
-    /** RF_CLR_5 — Riprenotazione rapida */
+    /** RF_CLR_5 — Riprenotazione rapida: recupera dati prenotazione per pre-compilare il form */
     @PostMapping("/{id}/rebook")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<BookingResponseDto> rebook(
             @PathVariable Long id,
-            @Valid @RequestBody RebookRequestDto dto,
             @AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.status(201).body(
-            bookingService.rebook(id, dto.date(), dto.startTime(), principal.getUser()));
+        return ResponseEntity.ok(bookingService.getBookingForRebook(id, principal.getUser()));
     }
 }

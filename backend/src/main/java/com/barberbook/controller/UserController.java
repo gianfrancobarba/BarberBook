@@ -1,9 +1,9 @@
 package com.barberbook.controller;
 
-import com.barberbook.dto.request.UpdateProfileRequestDto;
+import com.barberbook.dto.request.UpdateUserRequestDto;
 import com.barberbook.dto.response.UserResponseDto;
 import com.barberbook.security.UserPrincipal;
-import com.barberbook.service.ProfileService;
+import com.barberbook.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final ProfileService profileService;
+    private final UserMapper userMapper;
+    private final AuthService authService;
 
     /**
      * RF_CLR_6 — Recupera le informazioni del profilo dell'utente autenticato.
@@ -39,5 +40,12 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequestDto dto,
             @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.ok(profileService.updateProfile(principal.getUser(), dto));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UserResponseDto> updateMe(
+            @Valid @RequestBody UpdateUserRequestDto dto,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.ok(authService.updateProfile(principal.getId(), dto));
     }
 }

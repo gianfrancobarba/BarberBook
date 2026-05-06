@@ -1,9 +1,12 @@
 package com.barberbook.service;
 
+import com.barberbook.domain.enums.ScheduleType;
+import com.barberbook.domain.model.FasciaOraria;
 import com.barberbook.domain.model.Poltrona;
 import com.barberbook.domain.model.Prenotazione;
 import com.barberbook.dto.response.*;
 import com.barberbook.mapper.BookingMapper;
+import com.barberbook.repository.FasciaOrariaRepository;
 import com.barberbook.repository.PoltronaRepository;
 import com.barberbook.repository.PrenotazioneRepository;
 import com.barberbook.repository.specification.BookingSpecifications;
@@ -13,8 +16,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -30,6 +37,7 @@ public class DashboardService {
 
     private final PrenotazioneRepository prenotazioneRepository;
     private final PoltronaRepository poltronaRepository;
+    private final FasciaOrariaRepository fasciaOrariaRepository;
     private final BookingMapper bookingMapper;
 
     /**
@@ -50,7 +58,8 @@ public class DashboardService {
                 chair.getId(),
                 chair.getNome(),
                 date,
-                bookingMapper.toDtoList(bookings)
+                bookingMapper.toDtoList(bookings),
+                computeFreeSlots(chair, date, bookings)
             );
         }).collect(Collectors.toList());
 
@@ -89,7 +98,8 @@ public class DashboardService {
                         chair.getId(),
                         chair.getNome(),
                         day,
-                        bookingMapper.toDtoList(dayChairBookings)
+                        bookingMapper.toDtoList(dayChairBookings),
+                        computeFreeSlots(chair, day, dayChairBookings)
                     );
                 }).collect(Collectors.toList());
 
@@ -98,5 +108,50 @@ public class DashboardService {
             .collect(Collectors.toList());
 
         return new WeeklyDashboardResponseDto(weekStart, weekEnd, days);
+    }
+
+    private List<TimeSlotDto> computeFreeSlots(Poltrona chair, LocalDate date, List<Prenotazione> bookings) {
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        List<FasciaOraria> openingList = fasciaOrariaRepository
+            .findByPoltronaAndGiornoSettimanaAndTipo(chair, dayOfWeek, ScheduleType.APERTURA);
+        if (openingList.isEmpty()) {
+            return List.of();
+        }
+
+        FasciaOraria opening = openingList.get(0);
+        LocalTime openStart = opening.getOraInizio();
+        LocalTime openEnd = opening.getOraFine();
+
+        List<LocalTime[]> busy = new ArrayList<>();
+        for (Prenotazione b : bookings) {
+            busy.add(new LocalTime[]{b.getStartTime().toLocalTime(), b.getEndTime().toLocalTime()});
+        }
+
+        List<FasciaOraria> pauses = fasciaOrariaRepository
+            .findByPoltronaAndGiornoSettimanaAndTipo(chair, dayOfWeek, ScheduleType.PAUSA);
+        for (FasciaOraria pause : pauses) {
+            busy.add(new LocalTime[]{pause.getOraInizio(), pause.getOraFine()});
+        }
+
+        busy.sort(Comparator.comparing(a -> a[0]));
+
+        List<TimeSlotDto> freeSlots = new ArrayList<>();
+        LocalTime cursor = openStart;
+
+        for (LocalTime[] interval : busy) {
+            if (interval[0].isAfter(cursor)) {
+                freeSlots.add(new TimeSlotDto(cursor.toString(), interval[0].toString()));
+            }
+            if (interval[1].isAfter(cursor)) {
+                cursor = interval[1];
+            }
+        }
+
+        if (cursor.isBefore(openEnd)) {
+            freeSlots.add(new TimeSlotDto(cursor.toString(), openEnd.toString()));
+        }
+
+        return freeSlots;
     }
 }

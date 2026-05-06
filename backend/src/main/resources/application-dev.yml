@@ -33,7 +33,11 @@ logging:
 
 app:
   base-url: http://localhost:3000
+  cookie:
+    secure: false
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
 
 # ── Barber: dev password (admin1234) ──────────────────────────────────────────
 barber:
-  password-hash: $2a$12$0Nl.lR/wz6P0S/g6Gg/P7.1r58yI7g4yV0xS40mSg1/m.s23o20L6
+  password-hash: $2b$12$aiXou4BZqDZnUUFgXDFUL.4GFx5L1oDjwfsYZK/TRZP5hhWZWcSBe

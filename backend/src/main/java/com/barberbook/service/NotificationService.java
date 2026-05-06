@@ -40,6 +40,7 @@ public class NotificationService {
     // -------------------------------------------------------
     @EventListener
     @Async
+    @Transactional
     public void onBookingRequestCreated(BookingRequestCreatedEvent event) {
         Prenotazione booking = event.getBooking();
         User barber = getBarber();  // nel sistema: unico account BARBER
@@ -56,6 +57,7 @@ public class NotificationService {
     // -------------------------------------------------------
     @EventListener
     @Async
+    @Transactional
     public void onBookingAccepted(BookingAcceptedEvent event) {
         Prenotazione booking = event.getBooking();
 
@@ -76,6 +78,7 @@ public class NotificationService {
     // -------------------------------------------------------
     @EventListener
     @Async
+    @Transactional
     public void onBookingRejected(BookingRejectedEvent event) {
         Prenotazione booking = event.getBooking();
 
@@ -93,6 +96,7 @@ public class NotificationService {
     // -------------------------------------------------------
     @EventListener
     @Async
+    @Transactional
     public void onBookingCancelledByClient(BookingCancelledByClientEvent event) {
         Prenotazione booking = event.getBooking();
         User barber = getBarber();
@@ -110,6 +114,7 @@ public class NotificationService {
     // -------------------------------------------------------
     @EventListener
     @Async
+    @Transactional
     public void onBookingCancelledByBarber(BookingCancelledByBarberEvent event) {
         Prenotazione booking = event.getBooking();
 

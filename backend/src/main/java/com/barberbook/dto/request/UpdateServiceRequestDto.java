@@ -8,6 +8,6 @@ import java.math.BigDecimal;
 public record UpdateServiceRequestDto(
     @Size(max = 100) String nome,
     @Size(max = 500) String descrizione,
-    @Min(1) Integer durataMinuti,
+    @Min(1) Integer durata,
     @DecimalMin("0.00") BigDecimal prezzo
 ) {}

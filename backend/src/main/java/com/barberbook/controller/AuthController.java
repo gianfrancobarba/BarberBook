@@ -1,16 +1,16 @@
 package com.barberbook.controller;
 
+import com.barberbook.dto.request.ForgotPasswordRequestDto;
 import com.barberbook.dto.request.LoginRequestDto;
 import com.barberbook.dto.request.RegisterRequestDto;
-import com.barberbook.dto.request.ForgotPasswordRequestDto;
 import com.barberbook.dto.request.ResetPasswordRequestDto;
-import com.barberbook.dto.request.GuestRegisterRequestDto;
 import com.barberbook.dto.response.AuthResponseDto;
 import com.barberbook.service.AuthService;
 import com.barberbook.service.PasswordResetService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +25,9 @@ public class AuthController {
 
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+
+    @Value("${app.cookie.secure:true}")
+    private boolean cookieSecure;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDto> register(
@@ -72,31 +75,21 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDto dto) {
-        passwordResetService.requestPasswordReset(dto.email());
+        authService.requestPasswordReset(dto);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequestDto dto) {
-        passwordResetService.resetPassword(dto.token(), dto.newPassword());
+        authService.resetPassword(dto);
         return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/guest-register")
-    public ResponseEntity<AuthResponseDto> guestRegister(
-            @Valid @RequestBody GuestRegisterRequestDto dto,
-            HttpServletResponse response) {
-        AuthResponseDto auth = authService.registerFromGuest(dto.bookingId(), dto.email(), dto.password());
-        addRefreshTokenCookie(response, auth.refreshTokenRaw());
-        return ResponseEntity.status(201).body(new AuthResponseDto(
-                auth.accessToken(), auth.tokenType(), auth.expiresIn(), null, auth.user()));
     }
 
     private void addRefreshTokenCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
+                .secure(cookieSecure)
+                .sameSite(cookieSecure ? "Strict" : "Lax")
                 .maxAge(Duration.ofDays(7))
                 .path("/api/auth")
                 .build();
@@ -106,7 +99,7 @@ public class AuthController {
     private void clearRefreshTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .maxAge(0)
                 .path("/api/auth")
                 .build();

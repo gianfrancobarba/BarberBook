@@ -10,6 +10,6 @@ import java.math.BigDecimal;
 public record CreateServiceRequestDto(
     @NotBlank @Size(max = 100) String nome,
     @Size(max = 500) String descrizione,
-    @NotNull @Min(1) Integer durataMinuti,
+    @NotNull @Min(1) Integer durata,
     @NotNull @DecimalMin("0.00") BigDecimal prezzo
 ) {}
