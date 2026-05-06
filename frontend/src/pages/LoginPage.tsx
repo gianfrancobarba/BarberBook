@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Scissors, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Logo } from "@/components/common/Logo";
 
 const loginSchema = z.object({
   email: z.string().email("Inserisci un indirizzo email valido"),
@@ -61,12 +62,10 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="rounded-xl bg-barber-500 p-2 text-white">
-              <Scissors className="h-6 w-6" />
-            </div>
+          <div className="flex justify-center mb-2">
+            <Logo size="h-20" variant="auto" />
           </div>
-          <CardTitle className="text-2xl font-heading font-bold tracking-tight">BarberBook</CardTitle>
+          <CardTitle className="text-2xl font-heading font-bold tracking-tight">Bentornato</CardTitle>
           <CardDescription>
             Inserisci le tue credenziali per accedere
           </CardDescription>

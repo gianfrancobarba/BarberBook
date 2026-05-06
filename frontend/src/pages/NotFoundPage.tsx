@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/authStore";
-import { Scissors } from "lucide-react";
+import { Logo } from "@/components/common/Logo";
+import { Home } from "lucide-react";
 
 export default function NotFoundPage() {
   const { isAuthenticated, isBarber } = useAuthStore();
@@ -12,14 +13,15 @@ export default function NotFoundPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 text-center">
-      <Scissors className="h-16 w-16 text-barber-300 mb-6" />
-      <h1 className="text-7xl font-bold font-heading text-barber-500 mb-2">404</h1>
+      <Logo size="h-24" variant="auto" className="mb-8 opacity-30" />
+      <h1 className="text-8xl font-black font-heading text-barber-500 mb-2 leading-none">404</h1>
       <h2 className="text-2xl font-semibold mb-3">Pagina non trovata</h2>
-      <p className="text-muted-foreground mb-8 max-w-md">
-        La pagina che stai cercando non esiste o è stata spostata.
+      <p className="text-muted-foreground mb-8 max-w-sm">
+        La pagina che cerchi non esiste o è stata spostata.
       </p>
       <Link to={homeLink}>
-        <Button className="bg-barber-500 hover:bg-barber-600">
+        <Button className="bg-barber-500 hover:bg-barber-600 h-11 px-6">
+          <Home className="mr-2 h-4 w-4" />
           Torna alla home
         </Button>
       </Link>

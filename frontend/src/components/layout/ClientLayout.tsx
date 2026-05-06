@@ -1,35 +1,31 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { 
-  Home, 
-  CalendarDays, 
-  User, 
-  Scissors,
-  LogOut,
-  Menu
-} from "lucide-react";
+import { Home, CalendarDays, User, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { useLogout } from "@/hooks/useAuth";
+import { useAuthStore } from "@/stores/authStore";
+import { Logo } from "@/components/common/Logo";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const navItems = [
-  { icon: Home, label: "Home", href: "/my" },
+  { icon: Home,        label: "Home",         href: "/my" },
   { icon: CalendarDays, label: "Prenotazioni", href: "/my/bookings" },
-  { icon: User, label: "Profilo", href: "/my/profile" },
+  { icon: User,        label: "Profilo",       href: "/my/profile" },
 ];
 
 export function ClientLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const { mutate: logout } = useLogout();
+  const { user } = useAuthStore();
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar Mobile Overlay */}
+      {/* Overlay mobile */}
       {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden" 
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -40,15 +36,14 @@ export function ClientLayout() {
         !isSidebarOpen && "-translate-x-full"
       )}>
         <div className="flex h-full flex-col">
-          <div className="flex h-16 items-center border-b px-6">
-            <Link to="/my" className="flex items-center space-x-2">
-              <div className="rounded-lg bg-barber-500 p-1 text-white">
-                <Scissors className="h-4 w-4" />
-              </div>
-              <span className="font-heading font-bold">BarberBook</span>
+          {/* Brand */}
+          <div className="flex h-16 items-center border-b px-5">
+            <Link to="/my" onClick={() => setIsSidebarOpen(false)}>
+              <Logo size="h-9" variant="auto" />
             </Link>
           </div>
 
+          {/* Nav */}
           <nav className="flex-1 space-y-1 p-4">
             {navItems.map((item) => (
               <Link
@@ -56,8 +51,8 @@ export function ClientLayout() {
                 to={item.href}
                 className={cn(
                   "flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  location.pathname === item.href 
-                    ? "bg-barber-500 text-white" 
+                  location.pathname === item.href
+                    ? "bg-barber-500 text-white"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 onClick={() => setIsSidebarOpen(false)}
@@ -68,14 +63,20 @@ export function ClientLayout() {
             ))}
           </nav>
 
-          <div className="border-t p-4">
-            <Link to="/book">
-              <Button className="w-full bg-barber-500 hover:bg-barber-600 mb-2">
+          {/* Footer sidebar */}
+          <div className="border-t p-4 space-y-2">
+            {user && (
+              <div className="px-3 py-2 text-xs text-muted-foreground truncate">
+                {user.nome} {user.cognome}
+              </div>
+            )}
+            <Link to="/book" onClick={() => setIsSidebarOpen(false)}>
+              <Button className="w-full bg-barber-500 hover:bg-barber-600 mb-1">
                 Nuova Prenotazione
               </Button>
             </Link>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-start text-muted-foreground hover:text-destructive"
               onClick={() => logout()}
             >
@@ -86,12 +87,12 @@ export function ClientLayout() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex flex-1 flex-col">
         <header className="flex h-16 items-center justify-between border-b bg-background px-4 lg:px-8">
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="lg:hidden"
             onClick={() => setIsSidebarOpen(true)}
             aria-label="Apri menu navigazione"
@@ -102,7 +103,7 @@ export function ClientLayout() {
           <div className="ml-auto flex items-center space-x-4">
             <NotificationBell />
             <div className="h-8 w-px bg-border" />
-            <div className="text-sm font-medium hidden sm:block">Area Cliente</div>
+            <span className="text-sm font-medium hidden sm:block">Area Cliente</span>
           </div>
         </header>
 

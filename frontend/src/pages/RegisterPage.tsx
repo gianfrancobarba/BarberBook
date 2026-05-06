@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Scissors, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Logo } from "@/components/common/Logo";
 
 const registerSchema = z.object({
   nome: z.string().min(2, "Il nome deve avere almeno 2 caratteri"),
@@ -57,14 +58,12 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="rounded-xl bg-barber-500 p-2 text-white">
-              <Scissors className="h-6 w-6" />
-            </div>
+          <div className="flex justify-center mb-2">
+            <Logo size="h-20" variant="auto" />
           </div>
           <CardTitle className="text-2xl font-heading font-bold tracking-tight">Crea un account</CardTitle>
           <CardDescription>
-            Unisciti a BarberBook per gestire le tue prenotazioni
+            Registrati per gestire le tue prenotazioni
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
