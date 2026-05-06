@@ -60,12 +60,14 @@ export const handlers = [
   http.get('/api/health', () => HttpResponse.json({ status: 'UP' })),
 
   // Auth
-  http.post('/api/auth/login', () =>
-    HttpResponse.json({
+  http.post('/api/auth/login', async ({ request }) => {
+    const body = await request.json() as { email?: string };
+    const user = body.email?.includes('tony') ? mockBarberUser : mockUser;
+    return HttpResponse.json({
       accessToken: 'fake-jwt-token-test',
-      user: mockUser,
-    }),
-  ),
+      user,
+    });
+  }),
 
   http.post('/api/auth/register', () =>
     HttpResponse.json(
