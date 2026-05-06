@@ -34,11 +34,9 @@ export default function DailyDashboardPage() {
 
   const allBookings = dashboard?.chairs.flatMap(c => c.bookings) ?? [];
   const totalBookings = allBookings.length;
-  const pendingCount = allBookings.filter(b => b.stato === "IN_ATTESA").length;
-  const confirmedCount = allBookings.filter(b => b.stato === "ACCETTATA").length;
-  const expectedRevenue = allBookings
-    .filter(b => b.stato === "ACCETTATA")
-    .reduce((sum, b) => sum + (b.servizio.prezzo ?? 0), 0);
+  const pendingCount = allBookings.filter(b => b.status === "IN_ATTESA").length;
+  const confirmedCount = allBookings.filter(b => b.status === "ACCETTATA").length;
+  const expectedRevenue = confirmedCount; // il prezzo non è incluso nel BookingResponseDto
 
   const handleAccept = async (id: number) => {
     try {
@@ -74,7 +72,7 @@ export default function DailyDashboardPage() {
         <StatsCard title="Totale Prenotazioni" value={totalBookings} icon={CalendarIcon} />
         <StatsCard title="In Attesa" value={pendingCount} icon={Clock} className="border-amber-500/50 bg-amber-500/5" />
         <StatsCard title="Confermate" value={confirmedCount} icon={Check} className="border-green-500/50 bg-green-500/5" />
-        <StatsCard title="Incasso Previsto" value={`€${expectedRevenue}`} icon={TrendingUp} />
+        <StatsCard title="Servizi Confermati" value={expectedRevenue} icon={TrendingUp} />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
@@ -95,8 +93,8 @@ export default function DailyDashboardPage() {
                     <CardContent className="p-4 space-y-3">
                       <div className="flex justify-between items-start">
                         <div>
-                          <p className="font-bold">{p.client?.nome || p.guestNome} {p.client?.cognome || p.guestCognome}</p>
-                          <p className="text-xs text-muted-foreground">{p.servizio.nome}</p>
+                          <p className="font-bold">{p.customerName}</p>
+                          <p className="text-xs text-muted-foreground">{p.serviceName}</p>
                         </div>
                         <span className="text-xs font-mono font-bold bg-muted px-2 py-1 rounded">
                           {format(new Date(p.startTime), "HH:mm")}
@@ -167,14 +165,14 @@ export default function DailyDashboardPage() {
                             </div>
                             <div className="flex-1">
                               <p className="font-semibold text-sm">
-                                {b.client?.nome || b.guestNome} {b.client?.cognome || b.guestCognome}
-                                {b.guestNome && <span className="ml-2 text-[10px] bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-muted-foreground uppercase tracking-wider">Guest</span>}
+                                {b.customerName}
+                                {b.isGuest && <span className="ml-2 text-[10px] bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-muted-foreground uppercase tracking-wider">Guest</span>}
                               </p>
                               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Scissors className="h-3 w-3" /> {b.servizio.nome} ({b.servizio.durata}m)
+                                <Scissors className="h-3 w-3" /> {b.serviceName} ({b.serviceDurationMinutes}m)
                               </p>
                             </div>
-                            <StatusBadge status={b.stato} className="text-[10px] h-5" />
+                            <StatusBadge status={b.status} className="text-[10px] h-5" />
                           </div>
                         ))}
                       </div>

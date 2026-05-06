@@ -1,4 +1,4 @@
-import { useMyBookings, useCancelBooking, useRebook } from "@/hooks/useBookings";
+import { useMyBookings, useUpcomingBookings, useCancelBooking, useRebook } from "@/hooks/useBookings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export default function ClientBookingsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [bookingToCancel, setBookingToCancel] = useState<number | null>(null);
 
-  const { data: upcoming, isLoading: isLoadingUpcoming } = useMyBookings("ACCETTATA"); // Semplificato per demo, o mix di IN_ATTESA e ACCETTATA
+  const { data: upcoming, isLoading: isLoadingUpcoming } = useUpcomingBookings();
   const { data: past, isLoading: isLoadingPast } = useMyBookings("PASSATA");
   
   const cancelBooking = useCancelBooking();
@@ -72,7 +72,7 @@ export default function ClientBookingsPage() {
               <div className="flex-1 p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="space-y-1">
-                    <h3 className="text-xl font-bold">{booking.servizio.nome}</h3>
+                    <h3 className="text-xl font-bold">{booking.serviceName}</h3>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="mr-2 h-4 w-4" />
                       {format(new Date(booking.startTime), "EEEE d MMMM yyyy", { locale: it })}
@@ -82,15 +82,15 @@ export default function ClientBookingsPage() {
                       alle {format(new Date(booking.startTime), "HH:mm")}
                     </div>
                   </div>
-                  <StatusBadge status={booking.stato} />
+                  <StatusBadge status={booking.status} />
                 </div>
                 <div className="text-sm text-muted-foreground flex items-center">
                   <Scissors className="mr-2 h-4 w-4" />
-                  Prezzo: €{booking.servizio.prezzo}
+                  Durata: {booking.serviceDurationMinutes} min
                 </div>
               </div>
               <div className="bg-muted/50 p-4 flex flex-row sm:flex-col justify-center gap-2 sm:w-48 border-t sm:border-t-0 sm:border-l">
-                {type === "upcoming" && (booking.stato === "IN_ATTESA" || booking.stato === "ACCETTATA") && (
+                {type === "upcoming" && (booking.status === "IN_ATTESA" || booking.status === "ACCETTATA") && (
                   <Button 
                     variant="destructive" 
                     size="sm" 

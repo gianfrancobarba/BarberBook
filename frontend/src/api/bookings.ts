@@ -33,7 +33,7 @@ export const bookingsApi = {
     axiosInstance.get<BookingResponseDto[]>('/bookings/pending').then(res => res.data),
 
   getClientBookings: (status?: BookingStatus) =>
-    axiosInstance.get<BookingResponseDto[]>('/client/bookings', { params: { status } }).then(res => res.data),
+    axiosInstance.get<BookingResponseDto[]>('/client/bookings/filter', { params: status ? { status } : {} }).then(res => res.data),
 
   getUpcoming: () =>
     axiosInstance.get<BookingResponseDto[]>('/client/bookings/upcoming').then(res => res.data),

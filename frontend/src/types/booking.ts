@@ -1,21 +1,19 @@
-import { type UserResponseDto } from './auth';
-import { type ServiceResponseDto } from './service';
-import { type ChairResponseDto } from './chair';
-
 export type BookingStatus = "IN_ATTESA" | "ACCETTATA" | "RIFIUTATA" | "ANNULLATA" | "PASSATA";
 
 export interface BookingResponseDto {
   id: number;
-  client?: UserResponseDto; // opzionale se guest
-  guestNome?: string;
-  guestCognome?: string;
-  guestTelefono?: string;
-  servizio: ServiceResponseDto;
-  poltrona: ChairResponseDto;
+  chairId: number;
+  chairName: string;
+  serviceId: number;
+  serviceName: string;
+  serviceDurationMinutes: number;
   startTime: string;
   endTime: string;
-  stato: BookingStatus;
-  commentoAnnullamento?: string;
+  status: BookingStatus;
+  customerName: string;
+  isGuest: boolean;
+  guestPhone?: string;
+  cancellationReason?: string;
   createdAt: string;
 }
 

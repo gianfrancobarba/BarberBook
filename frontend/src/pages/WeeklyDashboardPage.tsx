@@ -79,13 +79,13 @@ export default function WeeklyDashboardPage() {
                       <div
                         key={b.id}
                         className="text-[10px] p-2 rounded bg-muted/50 border-l-2 border-barber-500 cursor-default"
-                        title={`${b.servizio.nome} – ${b.client?.nome || b.guestNome}`}
+                        title={`${b.serviceName} – ${b.customerName}`}
                       >
                         <div className="font-bold flex justify-between">
                           <span>{format(new Date(b.startTime), "HH:mm")}</span>
-                          <span className="text-barber-600 truncate ml-2">{b.client?.nome || b.guestNome}</span>
+                          <span className="text-barber-600 truncate ml-2">{b.customerName}</span>
                         </div>
-                        <div className="text-muted-foreground truncate">{b.servizio.nome}</div>
+                        <div className="text-muted-foreground truncate">{b.serviceName}</div>
                       </div>
                     ))}
                     {allBookings.length > 5 && (
