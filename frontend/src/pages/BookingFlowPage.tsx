@@ -27,7 +27,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { type ServiceResponseDto } from "@/types/service";
-import { type TimeSlotDto } from "@/types/booking";
+import { type BookableSlot } from "@/types/booking";
 
 type Step = "SERVICE" | "DATE" | "DETAILS" | "SUCCESS";
 
@@ -39,7 +39,7 @@ export default function BookingFlowPage() {
   const [step, setStep] = useState<Step>("SERVICE");
   const [selectedService, setSelectedService] = useState<ServiceResponseDto | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlotDto | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<BookableSlot | null>(null);
   
   // Guest Info
   const [guestInfo, setGuestInfo] = useState({
@@ -67,21 +67,26 @@ export default function BookingFlowPage() {
   const handleConfirm = async () => {
     if (!selectedService || !selectedSlot) return;
 
+    // Split ISO datetime "yyyy-MM-ddTHH:mm:ss" → date + startTime separati
+    const [date, startTime] = selectedSlot.startTime.split("T") as [string, string];
+
     try {
       if (isAuthenticated()) {
         await createBooking.mutateAsync({
           serviceId: selectedService.id,
           chairId: selectedSlot.chairId,
-          startTime: selectedSlot.startTime,
+          date,
+          startTime,
         });
       } else {
         await createGuestBooking.mutateAsync({
           serviceId: selectedService.id,
           chairId: selectedSlot.chairId,
-          startTime: selectedSlot.startTime,
-          nome: guestInfo.nome,
-          cognome: guestInfo.cognome,
-          telefono: guestInfo.telefono,
+          date,
+          startTime,
+          guestNome: guestInfo.nome,
+          guestCognome: guestInfo.cognome,
+          guestTelefono: guestInfo.telefono,
         });
       }
       setStep("SUCCESS");
@@ -244,7 +249,11 @@ export default function BookingFlowPage() {
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   locale={it}
-                  disabled={(date) => date < new Date() || date.getDay() === 0} // Esempio: disabilita passato e domenica
+                  disabled={(date) => {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return date < today || date.getDay() === 0;
+                  }}
                   className="rounded-md border-none"
                 />
               </CardContent>

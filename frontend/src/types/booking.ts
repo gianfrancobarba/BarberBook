@@ -22,13 +22,14 @@ export interface BookingResponseDto {
 export interface CreateBookingRequestDto {
   serviceId: number;
   chairId: number;
-  startTime: string; // ISO format
+  date: string;      // "yyyy-MM-dd"
+  startTime: string; // "HH:mm:ss"
 }
 
 export interface GuestBookingRequestDto extends CreateBookingRequestDto {
-  nome: string;
-  cognome: string;
-  telefono: string;
+  guestNome: string;
+  guestCognome: string;
+  guestTelefono: string;
 }
 
 export interface DirectBookingRequestDto extends CreateBookingRequestDto {
@@ -38,9 +39,23 @@ export interface DirectBookingRequestDto extends CreateBookingRequestDto {
   guestTelefono?: string;
 }
 
-export interface TimeSlotDto {
-  startTime: string;
-  endTime: string;
-  available: boolean;
+/** Slot come restituito dal backend: solo ora, senza data */
+export interface AvailabilitySlotDto {
+  start: string; // "HH:mm"
+  end: string;   // "HH:mm"
+}
+
+/** Risposta availability per una singola poltrona */
+export interface AvailabilityResponseDto {
   chairId: number;
+  chairName: string;
+  availableSlots: AvailabilitySlotDto[];
+}
+
+/** Slot arricchito usato nel booking flow: data+ora completa + chairId */
+export interface BookableSlot {
+  chairId: number;
+  chairName: string;
+  startTime: string; // ISO: "yyyy-MM-ddTHH:mm:ss"
+  endTime: string;   // ISO: "yyyy-MM-ddTHH:mm:ss"
 }

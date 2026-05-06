@@ -4,7 +4,6 @@ import { ClientLayout } from "@/components/layout/ClientLayout";
 import { BarberLayout } from "@/components/layout/BarberLayout";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 
-// Lazy loading placeholders
 import LandingPage from "@/pages/LandingPage";
 import BookingFlowPage from "@/pages/BookingFlowPage";
 import LoginPage from "@/pages/LoginPage";
@@ -20,18 +19,20 @@ import ManageServicesPage from "@/pages/ManageServicesPage";
 import ManageChairsPage from "@/pages/ManageChairsPage";
 import ManageSchedulesPage from "@/pages/ManageSchedulesPage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import RouteErrorPage from "@/pages/RouteErrorPage";
 
 export const router = createBrowserRouter([
   // Rotte Pubbliche Auth (senza layout)
-  { path: "/login", element: <LoginPage /> },
-  { path: "/register", element: <RegisterPage /> },
-  { path: "/forgot-password", element: <ForgotPasswordPage /> },
-  { path: "/reset-password", element: <ResetPasswordPage /> },
+  { path: "/login", element: <LoginPage />, errorElement: <RouteErrorPage /> },
+  { path: "/register", element: <RegisterPage />, errorElement: <RouteErrorPage /> },
+  { path: "/forgot-password", element: <ForgotPasswordPage />, errorElement: <RouteErrorPage /> },
+  { path: "/reset-password", element: <ResetPasswordPage />, errorElement: <RouteErrorPage /> },
 
   // Rotte Pubbliche con PublicLayout (Vetrina e Prenotazione)
   {
     path: "/",
     element: <PublicLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       { index: true, element: <LandingPage /> },
       { path: "book", element: <BookingFlowPage /> },
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
   {
     path: "/my",
     element: <ProtectedRoute requiredRole="CLIENT" />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         element: <ClientLayout />,
@@ -58,6 +60,7 @@ export const router = createBrowserRouter([
   {
     path: "/barber",
     element: <ProtectedRoute requiredRole="BARBER" />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         element: <BarberLayout />,
@@ -73,6 +76,6 @@ export const router = createBrowserRouter([
   },
 
   // 404
-  { path: "/404", element: <NotFoundPage /> },
+  { path: "/404", element: <NotFoundPage />, errorElement: <RouteErrorPage /> },
   { path: "*", element: <Navigate to="/404" replace /> },
 ]);
