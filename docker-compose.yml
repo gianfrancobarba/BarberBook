@@ -38,6 +38,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ../docker/Dockerfile.frontend
+      target: dev
     ports:
       - "3000:3000"
     volumes:
