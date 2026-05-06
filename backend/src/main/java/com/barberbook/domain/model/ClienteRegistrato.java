@@ -1,5 +1,6 @@
 package com.barberbook.domain.model;
 
+import com.barberbook.domain.enums.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -27,5 +28,10 @@ public class ClienteRegistrato extends User {
     @Override
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    @Override
+    public UserRole getRuolo() {
+        return UserRole.CLIENT;
     }
 }
