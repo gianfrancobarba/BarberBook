@@ -41,8 +41,8 @@ class ServiceCatalogServiceTest {
     void getAllActive_returnsOnlyActiveServices() {
         Servizio s1 = Servizio.builder().id(1L).nome("Taglio").attivo(true).build();
         Servizio s2 = Servizio.builder().id(2L).nome("Barba").attivo(true).build();
-        ServiceResponseDto dto1 = new ServiceResponseDto(1L, "Taglio", null, 30, BigDecimal.TEN);
-        ServiceResponseDto dto2 = new ServiceResponseDto(2L, "Barba", null, 20, BigDecimal.TEN);
+        ServiceResponseDto dto1 = new ServiceResponseDto(1L, "Taglio", null, 30, BigDecimal.TEN, true);
+        ServiceResponseDto dto2 = new ServiceResponseDto(2L, "Barba", null, 20, BigDecimal.TEN, true);
 
         given(servizioRepository.findByAttivoTrue()).willReturn(List.of(s1, s2));
         given(servizioMapper.toDtoList(any())).willReturn(List.of(dto1, dto2));
@@ -57,7 +57,7 @@ class ServiceCatalogServiceTest {
     @DisplayName("getById: servizio esistente e attivo ritorna DTO")
     void getById_existingActiveService_returnsDto() {
         Servizio s = Servizio.builder().id(1L).nome("Taglio").attivo(true).build();
-        ServiceResponseDto dto = new ServiceResponseDto(1L, "Taglio", null, 30, BigDecimal.TEN);
+        ServiceResponseDto dto = new ServiceResponseDto(1L, "Taglio", null, 30, BigDecimal.TEN, true);
 
         given(servizioRepository.findByIdAndAttivoTrue(1L)).willReturn(Optional.of(s));
         given(servizioMapper.toDto(s)).willReturn(dto);
@@ -81,7 +81,7 @@ class ServiceCatalogServiceTest {
     void create_validData_returnsCreatedDto() {
         CreateServiceRequestDto request = new CreateServiceRequestDto("Taglio", "Desc", 30, BigDecimal.TEN);
         Servizio s = Servizio.builder().nome("Taglio").build();
-        ServiceResponseDto dto = new ServiceResponseDto(1L, "Taglio", "Desc", 30, BigDecimal.TEN);
+        ServiceResponseDto dto = new ServiceResponseDto(1L, "Taglio", "Desc", 30, BigDecimal.TEN, true);
 
         given(servizioMapper.toEntity(request)).willReturn(s);
         given(servizioRepository.save(any())).willReturn(s);

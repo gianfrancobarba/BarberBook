@@ -35,7 +35,7 @@ class ServiceControllerTest {
 
     @BeforeEach
     void setUp() {
-        responseDto = new ServiceResponseDto(1L, "Taglio", "Solo forbici", 30, new BigDecimal("15.00"));
+        responseDto = new ServiceResponseDto(1L, "Taglio", "Solo forbici", 30, new BigDecimal("15.00"), true);
     }
 
     @Test
