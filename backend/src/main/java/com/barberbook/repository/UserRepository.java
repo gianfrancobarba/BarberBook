@@ -12,5 +12,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     Optional<User> findByEmail(String email);
-    List<User> findByRuolo(UserRole ruolo);
+
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.ruoloDiscriminator = :ruolo")
+    List<User> findByRuolo(@org.springframework.data.repository.query.Param("ruolo") UserRole ruolo);
 }

@@ -42,10 +42,6 @@ public abstract class User {
         return ruolo;
     }
 
-    @Transient
-    public String getPasswordHash() {
-        return null;
-    }
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

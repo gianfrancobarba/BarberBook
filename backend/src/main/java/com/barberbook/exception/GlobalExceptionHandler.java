@@ -12,6 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
+@lombok.extern.slf4j.Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailAlreadyExistsException.class)

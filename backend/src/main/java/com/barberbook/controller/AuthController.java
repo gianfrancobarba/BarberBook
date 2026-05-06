@@ -6,6 +6,7 @@ import com.barberbook.dto.request.RegisterRequestDto;
 import com.barberbook.dto.request.ResetPasswordRequestDto;
 import com.barberbook.dto.response.AuthResponseDto;
 import com.barberbook.service.AuthService;
+import com.barberbook.service.PasswordResetService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.time.Duration;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
     @Value("${app.cookie.secure:true}")
     private boolean cookieSecure;

@@ -13,6 +13,7 @@ public interface UserMapper {
     
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "ruolo", ignore = true)
+    @Mapping(target = "ruoloDiscriminator", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)

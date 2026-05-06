@@ -1,7 +1,6 @@
 package com.barberbook.service;
 
 import com.barberbook.domain.model.Poltrona;
-import com.barberbook.domain.model.Prenotazione;
 import com.barberbook.dto.response.DailyDashboardResponseDto;
 import com.barberbook.dto.response.WeeklyDashboardResponseDto;
 import com.barberbook.mapper.BookingMapper;

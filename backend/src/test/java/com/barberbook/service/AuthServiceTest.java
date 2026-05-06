@@ -3,6 +3,8 @@ package com.barberbook.service;
 import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.Barbiere;
 import com.barberbook.domain.model.ClienteRegistrato;
+import com.barberbook.domain.model.GuestData;
+import com.barberbook.domain.model.Prenotazione;
 import com.barberbook.domain.model.RefreshToken;
 import com.barberbook.domain.model.User;
 import com.barberbook.dto.request.LoginRequestDto;
@@ -14,6 +16,7 @@ import com.barberbook.exception.InvalidCredentialsException;
 import com.barberbook.exception.InvalidTokenException;
 import com.barberbook.exception.TokenReuseDetectedException;
 import com.barberbook.mapper.UserMapper;
+import com.barberbook.repository.PrenotazioneRepository;
 import com.barberbook.repository.RefreshTokenRepository;
 import com.barberbook.repository.UserRepository;
 import com.barberbook.security.JwtUtil;
@@ -42,6 +45,7 @@ class AuthServiceTest {
     @Mock PasswordEncoder passwordEncoder;
     @Mock JwtUtil jwtUtil;
     @Mock UserMapper userMapper;
+    @Mock PrenotazioneRepository prenotazioneRepository;
 
     @InjectMocks AuthService authService;
 
@@ -245,5 +249,26 @@ class AuthServiceTest {
         when(userRepository.findByEmail(dto.email())).thenReturn(Optional.of(unknownUser));
 
         assertThrows(IllegalStateException.class, () -> authService.login(dto));
+    }
+
+    @Test
+    @DisplayName("registerFromGuest: crea account e associa prenotazione")
+    void registerFromGuest_success() {
+        GuestData guest = new GuestData("Mario", "Rossi", "3331234567");
+        Prenotazione booking = Prenotazione.builder().id(1L).guestData(guest).build();
+
+        when(prenotazioneRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(userRepository.existsByEmail("mario@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("hashed");
+        when(jwtUtil.generateAccessToken(any())).thenReturn("at");
+        when(userMapper.toDto(any())).thenReturn(new UserResponseDto(1L, "Mario", "Rossi", "mario@example.com", "3331234567", UserRole.CLIENT));
+
+        AuthResponseDto result = authService.registerFromGuest(1L, "mario@example.com", "password123");
+
+        assertNotNull(result);
+        assertNotNull(booking.getClient());
+        assertNull(booking.getGuestData());
+        verify(userRepository).save(any(ClienteRegistrato.class));
+        verify(prenotazioneRepository).save(booking);
     }
 }

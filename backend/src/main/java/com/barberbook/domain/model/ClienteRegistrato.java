@@ -19,9 +19,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class ClienteRegistrato extends User {
 
-    @Column(nullable = false)
-    private String passwordHash;
-
     @Column
     private LocalDateTime emailVerifiedAt;
 

@@ -3,6 +3,7 @@ package com.barberbook;
 import com.barberbook.domain.event.BookingAcceptedEvent;
 import com.barberbook.domain.model.*;
 import com.barberbook.repository.NotificaRepository;
+import com.barberbook.repository.ServizioRepository;
 import com.barberbook.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -57,9 +58,11 @@ class NotificationIT {
     @Autowired private MockMvc mockMvc;
     @Autowired private NotificaRepository notificaRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private ServizioRepository serviceRepository;
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     private User client;
+    private Servizio service;
 
     @BeforeEach
     void setUp() {
@@ -84,6 +87,13 @@ class NotificationIT {
             c.setCreatedAt(LocalDateTime.now());
             return userRepository.save(c);
         });
+
+        service = new Servizio();
+        service.setNome("Taglio");
+        service.setDurataMinuti(30);
+        service.setPrezzo(java.math.BigDecimal.valueOf(20));
+        service.setCreatedAt(LocalDateTime.now());
+        service = serviceRepository.save(service);
     }
 
     @Test
@@ -112,7 +122,7 @@ class NotificationIT {
 
     @Test
     @DisplayName("API: Recupero notifiche e segna come letta")
-    @WithMockUser(username = "client@example.com")
+    @WithUserDetails("client@example.com")
     void api_manageNotifications() throws Exception {
         Notifica n = Notifica.builder()
                 .destinatario(client)
@@ -138,6 +148,7 @@ class NotificationIT {
         return Prenotazione.builder()
                 .id(999L)
                 .client(client)
+                .servizio(service)
                 .startTime(LocalDateTime.now())
                 .build();
     }

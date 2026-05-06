@@ -1,6 +1,5 @@
 package com.barberbook.security;
 
-import com.barberbook.domain.model.ClienteRegistrato;
 import com.barberbook.domain.model.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +27,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getPassword() {
-        if (user instanceof ClienteRegistrato client) {
-            return client.getPasswordHash();
-        }
-        return ""; // Il BAR ha la gestione password separata o nel config
+        return user.getPasswordHash();
     }
 
     @Override

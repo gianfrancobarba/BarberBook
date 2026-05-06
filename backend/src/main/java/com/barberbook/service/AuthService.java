@@ -2,6 +2,8 @@ package com.barberbook.service;
 
 import com.barberbook.domain.enums.UserRole;
 import com.barberbook.domain.model.ClienteRegistrato;
+import com.barberbook.domain.model.GuestData;
+import com.barberbook.domain.model.Prenotazione;
 import com.barberbook.domain.model.RefreshToken;
 import com.barberbook.domain.model.User;
 import com.barberbook.domain.model.PasswordResetToken;
@@ -21,6 +23,7 @@ import com.barberbook.mapper.UserMapper;
 import com.barberbook.repository.PasswordResetTokenRepository;
 import com.barberbook.repository.RefreshTokenRepository;
 import com.barberbook.repository.UserRepository;
+import com.barberbook.exception.ResourceNotFoundException;
 import com.barberbook.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -47,6 +50,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+    private final PrenotazioneRepository prenotazioneRepository;
 
     @Value("${barber.password-hash:}")
     private String barberPasswordHash;
@@ -172,6 +176,45 @@ public class AuthService {
                 rt.setRevoked(true);
                 refreshTokenRepository.save(rt);
             });
+    }
+
+    /**
+     * RF_CLG_2 — Conversione CLG in CLR.
+     * Parte dalla prenotazione ospite e crea un account CLR
+     * associando retroattivamente la prenotazione al nuovo utente.
+     */
+    public AuthResponseDto registerFromGuest(Long guestBookingId, String email, String password) {
+        Prenotazione booking = prenotazioneRepository.findById(guestBookingId)
+            .orElseThrow(() -> new ResourceNotFoundException("Prenotazione non trovata"));
+
+        if (booking.getClient() != null) {
+            throw new IllegalStateException("La prenotazione è già associata a un cliente registrato");
+        }
+        if (booking.getGuestData() == null) {
+            throw new IllegalStateException("Nessun dato ospite da cui creare account");
+        }
+
+        GuestData guest = booking.getGuestData();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException("Email già registrata: " + email);
+        }
+
+        ClienteRegistrato client = new ClienteRegistrato();
+        client.setNome(guest.getNome());
+        client.setCognome(guest.getCognome());
+        client.setTelefono(guest.getTelefono());
+        client.setEmail(email);
+        client.setPasswordHash(passwordEncoder.encode(password));
+        client.setCreatedAt(LocalDateTime.now());
+        userRepository.save(client);
+
+        // Associa retroattivamente la prenotazione al nuovo account
+        booking.setClient(client);
+        booking.setGuestData(null);   // rimuove i dati ospite ridondanti
+        prenotazioneRepository.save(booking);
+
+        return generateTokenPair(client);
     }
 
     private AuthResponseDto generateTokenPair(User user) {
